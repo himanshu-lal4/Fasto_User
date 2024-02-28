@@ -11,7 +11,29 @@ import {
 } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
 import {LoginManager, AccessToken} from 'react-native-fbsdk-next';
+import remoteConfig from '@react-native-firebase/remote-config';
+import {remoteConfigDefaults} from '../utils/remoteConfigDefaults';
 const LoginType = () => {
+  const [isAppleLoginBtn, setIsAppleLoginBtn] = useState(
+    remoteConfigDefaults.is_apple_login_btn,
+  );
+  const fetchRemoteConfig = async () => {
+    try {
+      await remoteConfig().setDefaults(remoteConfigDefaults);
+      await remoteConfig().fetch(10);
+      await remoteConfig().fetchAndActivate();
+
+      const isAppleLoginBtnValue =
+        remoteConfig().getValue('is_apple_login_btn')._value;
+      setIsAppleLoginBtn(isAppleLoginBtnValue);
+      console.log(isAppleLoginBtnValue);
+    } catch (error) {
+      console.error('Error fetching Remote Config:', error);
+    }
+  };
+  useEffect(() => {
+    fetchRemoteConfig();
+  }, []);
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
@@ -28,7 +50,6 @@ const LoginType = () => {
     return auth().signInWithCredential(googleCredential);
   }
   async function onFacebookButtonPress() {
-    // Attempt login with permissions
     const result = await LoginManager.logInWithPermissions([
       'public_profile',
       'email',
@@ -38,19 +59,16 @@ const LoginType = () => {
       console.log('User cancelled the login process');
     }
 
-    // Once signed in, get the users AccessToken
     const data = await AccessToken.getCurrentAccessToken();
 
     if (!data) {
       throw 'Something went wrong obtaining access token';
     }
 
-    // Create a Firebase credential with the AccessToken
     const facebookCredential = auth.FacebookAuthProvider.credential(
       data.accessToken,
     );
 
-    // Sign-in the user with the credential
     return auth().signInWithCredential(facebookCredential);
   }
   return (
@@ -86,21 +104,26 @@ const LoginType = () => {
           </Text>
         </TouchableOpacity>
       </Card>
-      <Card style={[styles.Card1, {backgroundColor: COLORS.graybackground}]}>
-        <TouchableOpacity
-          style={stylesPage.cardBox}
-          onPress={() => console.log('apple icon')}>
-          <MaterialCommunityIcons
-            name="apple"
-            size={45}
-            color="white"
-            type="MaterialCommunityIcons"
-          />
-          <Text style={[FONTS.body3, {color: COLORS.white1, paddingLeft: 20}]}>
-            Continue with Apple
-          </Text>
-        </TouchableOpacity>
-      </Card>
+      {isAppleLoginBtn === 'true' ? (
+        <Card style={[styles.Card1, {backgroundColor: COLORS.graybackground}]}>
+          <TouchableOpacity
+            style={stylesPage.cardBox}
+            onPress={() => console.log('apple icon')}>
+            <MaterialCommunityIcons
+              name="apple"
+              size={45}
+              color="white"
+              type="MaterialCommunityIcons"
+            />
+            <Text
+              style={[FONTS.body3, {color: COLORS.white1, paddingLeft: 20}]}>
+              Continue with Apple
+            </Text>
+          </TouchableOpacity>
+        </Card>
+      ) : (
+        ''
+      )}
     </View>
   );
 };

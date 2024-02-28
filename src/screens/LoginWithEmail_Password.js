@@ -78,7 +78,6 @@ const LoginWithEmail_Password = () => {
                         setEmail(text);
                         handleChange('email')(text);
                       }}
-                      // onChangeText={handleChange('email')}
                     />
                     {touched.email && errors.email && (
                       <Text style={styles.errorText}>{errors.email}</Text>
@@ -92,7 +91,6 @@ const LoginWithEmail_Password = () => {
                         setPassword(text);
                         handleChange('password')(text);
                       }}
-                      // onChangeText={handleChange('password')}
                       secure={true}
                     />
                     {touched.password && errors.password && (
