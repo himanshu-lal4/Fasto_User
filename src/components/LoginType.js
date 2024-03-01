@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import styles from '../assets/theme/style';
 import {Card} from 'react-native-paper';
@@ -13,7 +13,54 @@ import auth from '@react-native-firebase/auth';
 import {LoginManager, AccessToken} from 'react-native-fbsdk-next';
 import remoteConfig from '@react-native-firebase/remote-config';
 import {remoteConfigDefaults} from '../utils/remoteConfigDefaults';
+import messaging from '@react-native-firebase/messaging';
 const LoginType = () => {
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+    }
+  }
+  const getToken = async () => {
+    const token = await messaging().getToken();
+    console.log('🚀 ~ getToken ~ token:', token);
+  };
+  const NotificationListener = () => {
+    messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log(
+        'notification caused app to open from background state',
+        remoteMessage.notification,
+      );
+    });
+
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log(
+            'notification caused app to open from quit state:',
+            remoteMessage.notification,
+          );
+        }
+      });
+    messaging().onMessage(async remoteMessage => {
+      console.log('notification on foreground stae....', remoteMessage);
+      const {title, body} = remoteMessage.notification;
+
+      // Display an alert with the title and body
+      Alert.alert(title, body);
+      // Alert.alert(JSON.stringify(remoteMessage));
+    });
+  };
+  useEffect(() => {
+    requestUserPermission();
+    getToken();
+    NotificationListener();
+  });
   const [isAppleLoginBtn, setIsAppleLoginBtn] = useState(
     remoteConfigDefaults.is_apple_login_btn,
   );
