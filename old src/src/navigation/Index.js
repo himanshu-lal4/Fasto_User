@@ -1,17 +1,16 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import Login from '../screens/Login';
 import {StatusBar} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import StartUpScreen from '../screens/StartUpScreen';
 import Authnavigation from './Authnavigation';
 import {COLORS} from '../assets/theme';
-
 const Stack = createStackNavigator();
-
 const Index = () => {
   return (
     <NavigationContainer>
-      <StatusBar barStyle={'light-content'} backgroundColor={COLORS.blue} />
+      <StatusBar backgroundColor={COLORS.primaryBackgroundColor} />
       <Stack.Navigator
         initialRouteName="StartUpScreen"
         screenOptions={{
