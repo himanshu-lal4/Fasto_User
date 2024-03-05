@@ -33,11 +33,12 @@ const LoginType = () => {
       await GoogleSignin.hasPlayServices();
       const {idToken} = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      if (idToken) {
-        navigation.navigate('Dashboard');
-      }
       const {user} = await auth().signInWithCredential(googleCredential);
-      dispatch(addUID(user.uid));
+      if (user.uid) {
+        dispatch(addUID(user.uid));
+        navigation.navigate('SellerScreen');
+      }
+
       return;
 
       // return auth().signInWithCredential(googleCredential);
@@ -75,7 +76,10 @@ const LoginType = () => {
       data.accessToken,
     );
     const {user} = await auth().signInWithCredential(facebookCredential);
-    dispatch(addUID(user.uid));
+    if (user.uid) {
+      dispatch(addUID(user.uid));
+      navigation.navigate('SellerScreen');
+    }
     return;
   };
 

@@ -12,11 +12,19 @@ import React from 'react';
 import VectorIcon from '../assets/VectorIcon/VectorIcon';
 import {DummyData} from '../components/SellerScreen/DummyData';
 import {FONTS} from '../assets/theme';
+import {useNavigation} from '@react-navigation/native';
 
 const SellerScreen = () => {
+  const navigation = useNavigation();
+
   const renderItem = ({item}) =>
     item.id == 0 ? (
-      <TouchableOpacity key={item.id} style={styles.rootImgContainer}>
+      <TouchableOpacity
+        key={item.id}
+        style={styles.rootImgContainer}
+        onPress={() => {
+          navigation.navigate('QRScanner');
+        }}>
         <View style={styles.addIconContainer}>
           <VectorIcon name="add" size={60} style={styles.iconOpacity} />
         </View>

@@ -1,5 +1,5 @@
 import {StatusBar} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Login from '../screens/Login';
 import OnBoardScreen from '../screens/OnBoardScreen';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -11,10 +11,27 @@ import SelectImage from '../components/SelectImg';
 import Qr_codeScreen from '../screens/Qr_codeScreen';
 import Dashboard from '../screens/Dashboard';
 import QRScanner from '../screens/QRScanner';
+import SellerScreen from '../screens/SellerScreen';
+import auth from '@react-native-firebase/auth';
+import StartUpScreen from '../screens/StartUpScreen';
 
 const Stack = createStackNavigator();
 
 const Authnavigation = () => {
+  const [user, setUser] = useState('');
+  useEffect(() => {
+    const unregister = auth().onAuthStateChanged(userExist => {
+      if (userExist) {
+        setUser(userExist);
+      } else {
+        setUser('');
+      }
+    });
+    return () => {
+      unregister();
+    };
+  }, []);
+
   return (
     <>
       <StatusBar barStyle={'light-content'} backgroundColor={COLORS.darkBlue} />
@@ -22,17 +39,22 @@ const Authnavigation = () => {
         screenOptions={{
           headerShown: false,
         }}>
-        <Stack.Screen name="Login" component={Login} />
-        {/* <Stack.Screen name="OnBoardScreen" component={OnBoardScreen} /> */}
-        {/* <Stack.Screen name="SubcategoryScreen" component={SubcategoryScreen} /> */}
-        <Stack.Screen name="Dashboard" component={Dashboard} />
-        <Stack.Screen name="QRScanner" component={QRScanner} />
-        <Stack.Screen
-          name="LoginWithEmail_Password"
-          component={LoginWithEmail_Password}
-        />
-        <Stack.Screen name="ChooseImgScreen" component={ChooseImgScreen} />
-        <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
+        {user ? (
+          <>
+            <Stack.Screen name="SellerScreen" component={SellerScreen} />
+            <Stack.Screen name="QRScanner" component={QRScanner} />
+            <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="StartUpScreen" component={StartUpScreen} />
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen
+              name="LoginWithEmail_Password"
+              component={LoginWithEmail_Password}
+            />
+          </>
+        )}
       </Stack.Navigator>
     </>
   );

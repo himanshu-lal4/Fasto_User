@@ -13,11 +13,9 @@ const Index = () => {
     <NavigationContainer>
       <StatusBar barStyle={'light-content'} backgroundColor={COLORS.blue} />
       <Stack.Navigator
-        initialRouteName="StartUpScreen"
         screenOptions={{
           headerShown: false,
         }}>
-        <Stack.Screen name="StartUpScreen" component={StartUpScreen} />
         <Stack.Screen name="Auth" component={Authnavigation} />
       </Stack.Navigator>
     </NavigationContainer>
