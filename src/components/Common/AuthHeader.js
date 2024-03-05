@@ -5,17 +5,19 @@ import {COLORS} from '../../assets/theme';
 import styles from '../../assets/theme/style';
 import VectorIcon from '../../utils/VectorIcon';
 
-const AuthHeader = ({tittle, onPress}) => {
+const AuthHeader = ({tittle, onPress, backButton}) => {
   const navigation = useNavigation();
   return (
     <View style={styles.containerAuth}>
-      <VectorIcon
-        name="arrow-back"
-        type="Ionicons"
-        size={24}
-        color={COLORS.black}
-        onPress={onPress}
-      />
+      {backButton && (
+        <VectorIcon
+          name="arrow-back"
+          type="Ionicons"
+          size={24}
+          color={COLORS.black}
+          onPress={onPress}
+        />
+      )}
       <Text style={styles.authContainertext}>{tittle}</Text>
     </View>
   );

@@ -56,7 +56,7 @@ const StartUpScreen = ({navigation}) => {
         /> */}
         <TouchableOpacity
           style={styles.btn}
-          onPress={() => navigation.navigate('Auth')}>
+          onPress={() => navigation.navigate('Login')}>
           <Text style={[FONTS.h3, {color: 'white'}]}>ready!</Text>
         </TouchableOpacity>
       </View>

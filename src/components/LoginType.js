@@ -36,7 +36,6 @@ const LoginType = () => {
       const {user} = await auth().signInWithCredential(googleCredential);
       if (user.uid) {
         dispatch(addUID(user.uid));
-        navigation.navigate('SellerScreen');
       }
 
       return;
@@ -78,7 +77,6 @@ const LoginType = () => {
     const {user} = await auth().signInWithCredential(facebookCredential);
     if (user.uid) {
       dispatch(addUID(user.uid));
-      navigation.navigate('SellerScreen');
     }
     return;
   };
