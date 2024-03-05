@@ -14,7 +14,7 @@ import {
 import {AccessToken, LoginManager} from 'react-native-fbsdk-next';
 import {useDispatch} from 'react-redux';
 import {addUID} from '../redux/userTokenSlice';
-
+import firestore from '@react-native-firebase/firestore';
 const LoginType = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -34,9 +34,29 @@ const LoginType = () => {
       const {idToken} = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const {user} = await auth().signInWithCredential(googleCredential);
+      firestore()
+        .collection('user')
+        .doc(user.uid)
+        .set({
+          name: user.displayName,
+          email: user.email,
+          photoUrl: user.photoURL,
+          seller: [
+            {
+              id: '0',
+              data: {
+                email: 'deafult@gmail.com',
+                imageUrl: 'https://picsum.photos/id/1/5000/3333',
+                name: 'Add',
+              },
+            },
+          ],
+        })
+        .then(() => {
+          console.log('User added!');
+        });
       if (user.uid) {
         dispatch(addUID(user.uid));
-        navigation.navigate('SellerScreen');
       }
 
       return;
@@ -78,7 +98,6 @@ const LoginType = () => {
     const {user} = await auth().signInWithCredential(facebookCredential);
     if (user.uid) {
       dispatch(addUID(user.uid));
-      navigation.navigate('SellerScreen');
     }
     return;
   };

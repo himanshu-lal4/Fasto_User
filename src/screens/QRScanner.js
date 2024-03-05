@@ -1,7 +1,6 @@
-import {ActivityIndicator, Alert, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {StyleSheet, Text} from 'react-native';
+import React, {useState} from 'react';
 import {
-  useCameraPermission,
   useCameraDevice,
   useCodeScanner,
   Camera,
@@ -11,12 +10,7 @@ import {SetUID} from '../redux/userIdSlice';
 
 const QRScanner = ({navigation}) => {
   const dispatch = useDispatch();
-  const {hasPermission, requestPermission} = useCameraPermission();
   const [scanned, setScanned] = useState(false);
-
-  useEffect(() => {
-    requestPermission();
-  }, []);
 
   const device = useCameraDevice('back');
 
@@ -26,7 +20,7 @@ const QRScanner = ({navigation}) => {
       setScanned(true);
       const codeValue = codes[0].value;
       dispatch(SetUID(codeValue));
-      navigation.navigate('Dashboard');
+      navigation.navigate('SellerScreen');
     },
   });
 
@@ -34,20 +28,16 @@ const QRScanner = ({navigation}) => {
 
   return (
     <>
-      {hasPermission ? (
-        <>
-          {scanned ? null : (
-            <Camera
-              style={StyleSheet.absoluteFill}
-              device={device}
-              isActive={true}
-              codeScanner={codeScanner}
-            />
-          )}
-        </>
-      ) : (
-        <ActivityIndicator size={'large'} />
-      )}
+      <>
+        {scanned ? null : (
+          <Camera
+            style={StyleSheet.absoluteFill}
+            device={device}
+            isActive={true}
+            codeScanner={codeScanner}
+          />
+        )}
+      </>
     </>
   );
 };

@@ -68,7 +68,7 @@ const LoginWithEmail_Password = () => {
         const userToken = userCredential.user.uid;
 
         if (userToken) {
-          dispatch(addUID(userToken));
+          // dispatch(addUID(userToken));
           navigation.navigate('SellerScreen');
         }
       })

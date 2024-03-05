@@ -9,19 +9,23 @@ import LoginWithEmail_Password from '../screens/LoginWithEmail_Password';
 import ChooseImgScreen from '../screens/ChooseImgScreen';
 import SelectImage from '../components/SelectImg';
 import Qr_codeScreen from '../screens/Qr_codeScreen';
-import Dashboard from '../screens/Dashboard';
 import QRScanner from '../screens/QRScanner';
 import SellerScreen from '../screens/SellerScreen';
 import auth from '@react-native-firebase/auth';
 import StartUpScreen from '../screens/StartUpScreen';
+import {useDispatch} from 'react-redux';
+import {addUID} from '../redux/userTokenSlice';
 
 const Stack = createStackNavigator();
 
 const Authnavigation = () => {
   const [user, setUser] = useState('');
+  const dispatch = useDispatch();
   useEffect(() => {
     const unregister = auth().onAuthStateChanged(userExist => {
       if (userExist) {
+        // console.log('user exist', userExist.uid);
+        dispatch(addUID(userExist.uid));
         setUser(userExist);
       } else {
         setUser('');
@@ -36,6 +40,7 @@ const Authnavigation = () => {
     <>
       <StatusBar barStyle={'light-content'} backgroundColor={COLORS.darkBlue} />
       <Stack.Navigator
+        // initialRouteName="Login"
         screenOptions={{
           headerShown: false,
         }}>
@@ -47,8 +52,8 @@ const Authnavigation = () => {
           </>
         ) : (
           <>
-            <Stack.Screen name="StartUpScreen" component={StartUpScreen} />
             <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="StartUpScreen" component={StartUpScreen} />
             <Stack.Screen
               name="LoginWithEmail_Password"
               component={LoginWithEmail_Password}
