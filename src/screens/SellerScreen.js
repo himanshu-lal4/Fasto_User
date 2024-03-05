@@ -8,17 +8,107 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import VectorIcon from '../assets/VectorIcon/VectorIcon';
 import {DummyData} from '../components/SellerScreen/DummyData';
 import {FONTS} from '../assets/theme';
-import {useNavigation} from '@react-navigation/native';
-
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import firestore from '@react-native-firebase/firestore';
+import {firebase} from '@react-native-firebase/auth';
 const SellerScreen = () => {
   const navigation = useNavigation();
+  const [sellerData, setSellerData] = useState([]);
+  const userToken = useSelector(state => state.userId.UID);
+  const currUserToken = useSelector(state => state.userToken.UID);
+  console.log('scanned user token ', userToken);
+  const addNewSeller = () => {
+    firestore()
+      .collection('Sellers')
+      .doc(userToken)
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          // Document data is available in doc.data()
+          const userData = doc.data();
+          const obj = {
+            id: userToken,
+            data: {
+              name: userData.name,
+              imageUrl: userData.photoUrl,
+              email: userData.email,
+            },
+          };
+          console.log(' user fatched ', userData);
+          // Update Firestore document
+          firestore()
+            .collection('user')
+            .doc(currUserToken)
+            .update({
+              // Use FieldValue.arrayUnion to add the new seller to the existing array
+              seller: firestore.FieldValue.arrayUnion(obj),
+            })
+            .then(() => {
+              console.log('New seller added to Firestore!');
+            })
+            .catch(error => {
+              console.error('Error updating Firestore document:', error);
+            });
+          console.log('User data:', userData);
+        } else {
+          console.log('No such document!');
+        }
+      })
+      .catch(error => {
+        console.error('Error getting document:', error);
+      });
+  };
 
-  const renderItem = ({item}) =>
-    item.id == 0 ? (
+  // Assuming you have Firebase initialized and the user is authenticated
+
+  // useEffect(() => {
+  //   console.log('inside live useEffect');
+  //   const user = firebase.auth().currentUser;
+
+  //   // Reference to the user document in Firestore
+  //   const userDocRef = firestore().collection('user').doc(currUserToken);
+
+  //   // Set up a real-time listener to get the updated user data
+  //   userDocRef.onSnapshot(snapshot => {
+  //     const userData = snapshot.data();
+  //     console.log('inside live snapshot ', snapshot);
+  //     // Check if the user has the 'seller' field
+  //     if (userData && userData.seller) {
+  //       const sellersData = userData.seller;
+
+  //       // Now sellersData contains all the sellers' data
+  //       console.log('seller data ', sellersData);
+  //     }
+  //   });
+  // }, []);
+  async function func() {
+    console.log('current user token ', currUserToken);
+    const user = await firestore()
+      .collection('user')
+      .doc(currUserToken)
+      .orderBy(data().id, 'desc')
+      .get();
+    setSellerData(user.data().seller);
+    console.log('usestate seller data ', user.data().seller);
+  }
+
+  useEffect(() => {
+    func();
+  }, []);
+
+  // Call the function to add a new seller
+  useEffect(() => {
+    addNewSeller();
+  }, [userToken]);
+
+  const renderItem = ({item}) => {
+    console.log(item.data.name);
+    return item.id == 0 ? (
       <TouchableOpacity
         key={item.id}
         style={styles.rootImgContainer}
@@ -38,6 +128,7 @@ const SellerScreen = () => {
         <Text style={[FONTS.h4, styles.text]}>{item.data.name}</Text>
       </TouchableOpacity>
     );
+  };
 
   return (
     <SafeAreaView style={styles.rootContainer}>
@@ -50,7 +141,7 @@ const SellerScreen = () => {
         contentContainerStyle={{
           marginTop: 20,
         }}
-        data={DummyData}
+        data={sellerData}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         numColumns={3}

@@ -26,7 +26,8 @@ const QRScanner = ({navigation}) => {
       setScanned(true);
       const codeValue = codes[0].value;
       dispatch(SetUID(codeValue));
-      navigation.navigate('Dashboard');
+      // console.log(codeValue);
+      navigation.navigate('SellerScreen');
     },
   });
 
