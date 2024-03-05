@@ -22,77 +22,77 @@ const SellerScreen = () => {
   const userToken = useSelector(state => state.userId.UID);
   const currUserToken = useSelector(state => state.userToken.UID);
   console.log('scanned user token ', userToken);
-  const addNewSeller = () => {
-    firestore()
-      .collection('Sellers')
-      .doc(userToken)
-      .get()
-      .then(doc => {
-        if (doc.exists) {
-          // Document data is available in doc.data()
-          const userData = doc.data();
-          const obj = {
-            id: userToken,
-            data: {
-              name: userData.name,
-              imageUrl: userData.photoUrl,
-              email: userData.email,
-            },
-          };
-          console.log(' user fatched ', userData);
-          // Update Firestore document
-          firestore()
-            .collection('user')
-            .doc(currUserToken)
-            .update({
-              // Use FieldValue.arrayUnion to add the new seller to the existing array
-              seller: firestore.FieldValue.arrayUnion(obj),
-            })
-            .then(() => {
-              console.log('New seller added to Firestore!');
-            })
-            .catch(error => {
-              console.error('Error updating Firestore document:', error);
-            });
-          console.log('User data:', userData);
-        } else {
-          console.log('No such document!');
-        }
-      })
-      .catch(error => {
-        console.error('Error getting document:', error);
-      });
+
+  const addNewSeller = async () => {
+    try {
+      const doc = await firestore().collection('Sellers').doc(userToken).get();
+
+      if (doc.exists) {
+        const userData = doc.data();
+        const obj = {
+          id: userToken,
+          data: {
+            name: userData.name,
+            imageUrl: userData.photoUrl,
+            email: userData.email,
+          },
+        };
+
+        await firestore()
+          .collection('user')
+          .doc(currUserToken)
+          .update({
+            seller: firestore.FieldValue.arrayUnion(obj),
+          });
+
+        console.log('New seller added to Firestore!');
+      } else {
+        console.log('No such document!');
+      }
+    } catch (error) {
+      console.error('Error updating Firestore document:', error);
+    }
   };
 
-  async function func() {
-    console.log('current user token ', currUserToken);
-    const user = await firestore().collection('user').doc(currUserToken).get();
+  const fetchUserData = async () => {
+    try {
+      console.log('current user token ', currUserToken);
+      const user = await firestore()
+        .collection('user')
+        .doc(currUserToken)
+        .get();
 
-    if (user.exists) {
-      // Check if the document exists
-      const sellerData = user.data().seller;
+      if (user.exists) {
+        const sellerData = user.data().seller;
+        const sortedSellerData = sellerData ? sellerData.reverse() : [];
 
-      // Sort the seller array in descending order based on the 'id' field
-      const sortedSellerData = sellerData.reverse();
-
-      setSellerData(sortedSellerData);
-      console.log('usestate seller data ', sortedSellerData);
-    } else {
-      console.log('User document not found');
+        setSellerData(sortedSellerData);
+        console.log('usestate seller data ', sortedSellerData);
+      } else {
+        console.log('User document not found');
+      }
+    } catch (error) {
+      console.error('Error getting user document:', error);
     }
-  }
-
+  };
   useEffect(() => {
-    func();
-  }, []);
+    const fetchData = async () => {
+      try {
+        // console.log('Calling addNewSeller');
+        await addNewSeller();
+        // console.log('Calling fetchUserData');
+        await fetchUserData();
+        // console.log('useeffect');
+      } catch (error) {
+        console.error('Error in useEffect:', error);
+      }
+    };
 
-  // Call the function to add a new seller
-  useEffect(() => {
-    addNewSeller();
+    fetchData();
   }, [userToken]);
 
   const renderItem = ({item}) => {
-    console.log(item.data.name);
+    console.log(item.id);
     return item.id == 0 ? (
       <TouchableOpacity
         key={item.id}
@@ -128,7 +128,7 @@ const SellerScreen = () => {
         }}
         data={sellerData}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.id.toString()}
         numColumns={3}
       />
     </SafeAreaView>
