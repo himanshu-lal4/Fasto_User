@@ -39,10 +39,7 @@ const Login = () => {
             flexGrow: 1,
             justifyContent: 'space-between',
           }}>
-          <AuthHeader
-            tittle="Let's you in"
-            onPress={() => navigation.goBack()}
-          />
+          <AuthHeader tittle="Let's you in" backButton={false} />
           <Image
             source={require('../assets/images/signin.png')}
             style={{height: 250, width: 250, alignSelf: 'center'}}

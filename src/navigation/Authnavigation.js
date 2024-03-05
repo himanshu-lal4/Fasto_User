@@ -52,8 +52,8 @@ const Authnavigation = () => {
           </>
         ) : (
           <>
-            <Stack.Screen name="StartUpScreen" component={StartUpScreen} />
             <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="StartUpScreen" component={StartUpScreen} />
             <Stack.Screen
               name="LoginWithEmail_Password"
               component={LoginWithEmail_Password}
