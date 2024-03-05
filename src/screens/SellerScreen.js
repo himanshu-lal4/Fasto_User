@@ -88,11 +88,7 @@ const SellerScreen = () => {
   // }, []);
   async function func() {
     console.log('current user token ', currUserToken);
-    const user = await firestore()
-      .collection('user')
-      .doc(currUserToken)
-      .orderBy(data().id, 'desc')
-      .get();
+    const user = await firestore().collection('user').doc(currUserToken).get();
     setSellerData(user.data().seller);
     console.log('usestate seller data ', user.data().seller);
   }
