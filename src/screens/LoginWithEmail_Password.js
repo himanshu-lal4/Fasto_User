@@ -4,20 +4,29 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Image,
   KeyboardAvoidingView,
   ScrollView,
+  Alert,
 } from 'react-native';
-import React, {useState} from 'react';
-import InputText from '../components/InputText';
-import Button from '../components/Button';
-import Icons from 'react-native-vector-icons/Ionicons';
+import React, {useEffect, useState} from 'react';
+import InputText from '../components/Common/InputText';
+import Button from '../components/Common/Button';
 import * as Yup from 'yup';
 import {Formik} from 'formik';
 import {COLORS, FONTS} from '../assets/theme';
-import AuthHeader from '../components/AuthHeader';
+import AuthHeader from '../components/Common/AuthHeader';
 import {Checkbox} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
+import {AccessToken, LoginManager} from 'react-native-fbsdk-next';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
+import Line from '../components/Common/Line';
+import {useDispatch} from 'react-redux';
+import {addUID} from '../redux/userTokenSlice';
+
 const validationSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email address')
@@ -27,42 +36,68 @@ const validationSchema = Yup.object().shape({
     .min(6, 'Password must be at least 6 characters'),
 });
 
+const createUserWithEmailPassword = (email, password) => {
+  const dispatch = useDispatch();
+  auth()
+    .createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      console.log('User account created & signed in!');
+    })
+    .catch(error => {
+      if (error.code === 'auth/email-already-in-use') {
+        console.log('That email address is already in use!');
+        Alert.alert('This email is already in use');
+      }
+
+      if (error.code === 'auth/invalid-email') {
+        console.log('That email address is invalid!');
+      }
+    });
+};
+
 const LoginWithEmail_Password = () => {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
   const [checked, setChecked] = useState(false);
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const createUser = () => {
+  const signInUser = (email, password) => {
     auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then(() => {
-        console.log('User account created & signed in!');
+      .signInWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        // console.log('User loggesd in Successfully', userCredential);
+        const userToken = userCredential.user.uid;
+
+        if (userToken) {
+          dispatch(addUID(userToken));
+          navigation.navigate('SellerScreen');
+        }
       })
       .catch(error => {
-        if (error.code === 'auth/email-already-in-use') {
-          console.log('That email address is already in use!');
-        }
-
-        if (error.code === 'auth/invalid-email') {
-          console.log('That email address is invalid!');
-        }
-
-        console.error(error);
+        console.log('error while login ' + error);
       });
   };
-  const handleSubmit = values => {
-    if (checked) {
-      console.log(values);
+
+  const handleSubmit = (values, actions) => {
+    if (values) {
+      // console.log(values);
+      // createUserWithEmailPassword(values.email, values.password);
+      signInUser(values.email, values.password);
+      actions.resetForm();
     }
-    createUser();
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
         style={styles.container}>
         <ScrollView>
-          <AuthHeader tittle="Sign In with Password" />
+          <AuthHeader
+            tittle="Sign In with Password"
+            onPress={() => {
+              navigation.goBack();
+            }}
+          />
           <View style={{marginTop: 30}}>
             <Formik
               initialValues={{email: '', password: ''}}
@@ -70,27 +105,22 @@ const LoginWithEmail_Password = () => {
               onSubmit={handleSubmit}>
               {({handleChange, handleSubmit, values, errors, touched}) => (
                 <View>
-                  <View style={{height: 90}}>
+                  <View>
                     <InputText
                       value={values.email}
                       placeholder="Email"
-                      onChangeText={text => {
-                        setEmail(text);
-                        handleChange('email')(text);
-                      }}
+                      onChangeText={handleChange('email')}
                     />
                     {touched.email && errors.email && (
                       <Text style={styles.errorText}>{errors.email}</Text>
                     )}
                   </View>
-                  <View style={{height: 90}}>
+                  <View>
                     <InputText
                       value={values.password}
                       placeholder="Password"
-                      onChangeText={text => {
-                        setPassword(text);
-                        handleChange('password')(text);
-                      }}
+                      onChangeText={handleChange('password')}
+                      style={{height: 50}}
                       secure={true}
                     />
                     {touched.password && errors.password && (
@@ -99,61 +129,34 @@ const LoginWithEmail_Password = () => {
                   </View>
 
                   <View style={styles.checkboxContainer}>
-                    <Checkbox
-                      status={checked ? 'checked' : 'unchecked'}
-                      onPress={() => {
-                        setChecked(!checked);
-                      }}
-                    />
-                    <Text style={styles.label}>Do you like React Native?</Text>
+                    <View
+                      style={{flexDirection: 'row', justifyContent: 'center'}}>
+                      <Checkbox
+                        color="#0a57fd"
+                        status={checked ? 'checked' : 'unchecked'}
+                        onPress={() => {
+                          setChecked(!checked);
+                        }}
+                      />
+                      <Text style={styles.label}>Remember me</Text>
+                    </View>
+
                     <TouchableOpacity>
                       <Text style={styles.reset}>Reset Password</Text>
                     </TouchableOpacity>
                   </View>
-                  <Button
-                    color="#ee1c24"
-                    tittle="SIGN IN"
-                    onPress={handleSubmit}
-                  />
+
+                  <Button tittle="sign in" onPress={() => handleSubmit()} />
                 </View>
               )}
             </Formik>
           </View>
-          <View style={styles.continue}>
-            <View style={styles.line}></View>
-            <Text style={{color: COLORS.gray}}>or continue with</Text>
-            <View style={styles.line}></View>
-          </View>
-          <View style={styles.icons}>
-            <View style={styles.google}>
-              <TouchableOpacity>
-                <Image
-                  style={styles.googleIcon}
-                  source={require('../assets/icons/Google.webp')}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <Icons
-              style={styles.icon}
-              name="logo-facebook"
-              size={32}
-              color={'blue'}
-            />
-            <Icons
-              style={styles.icon}
-              name="logo-apple"
-              size={32}
-              color={COLORS.white1}
-            />
-          </View>
-
           <View style={styles.bottomView}>
-            <Text style={[FONTS.body4, {color: COLORS.white1}]}>
+            <Text style={[FONTS.body4, {color: COLORS.black}]}>
               Don't have an account?
             </Text>
             <Text
-              style={[FONTS.body4, {color: '#008fb3', marginLeft: 5}]}
+              style={[FONTS.body4, {color: COLORS.blue, marginLeft: 5}]}
               onPress={() => {}}>
               Sign up
             </Text>
@@ -168,32 +171,21 @@ export default LoginWithEmail_Password;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgb(18,38,54)',
+    backgroundColor: 'white',
   },
   checkboxContainer: {
-    display: 'flex',
+    width: '100%',
     flexDirection: 'row',
+    justifyContent: 'space-between',
     marginHorizontal: 20,
     marginTop: 30,
   },
+  line: {marginTop: '20%', marginBottom: '2%'},
   label: {
-    color: COLORS.white,
+    color: COLORS.black,
     marginTop: 6,
   },
-  reset: {color: '#008fb3', marginLeft: '30%', marginTop: 7},
-  continue: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginHorizontal: 35,
-    marginTop: 60,
-  },
-  line: {
-    width: 100,
-    borderBottomWidth: 1,
-    borderColor: COLORS.gray,
-    marginBottom: 8,
-    marginHorizontal: 10,
-  },
+  reset: {color: COLORS.darkBlue, marginLeft: '30%', marginTop: 7},
   google: {
     paddingHorizontal: 20,
     paddingVertical: 5,

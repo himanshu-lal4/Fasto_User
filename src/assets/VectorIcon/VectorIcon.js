@@ -11,6 +11,7 @@ import Ionicons from 'react-native-vector-icons/dist/Ionicons';
 import EvilIcons from 'react-native-vector-icons/dist/EvilIcons';
 import Octicons from 'react-native-vector-icons/dist/Octicons';
 import Fontisto from 'react-native-vector-icons/dist/Fontisto';
+import FontAwesome6 from 'react-native-vector-icons/dist/FontAwesome6';
 
 const VectorIcon = props => {
   const {name, size, color, type, onPress, style} = props;
@@ -27,6 +28,8 @@ const VectorIcon = props => {
         <FontAwesome onPress={onPress} name={name} size={size} color={color} />
       ) : type === 'FontAwesome5' ? (
         <FontAwesome5 onPress={onPress} name={name} size={size} color={color} />
+      ) : type === 'FontAwesome6' ? (
+        <FontAwesome6 onPress={onPress} name={name} size={size} color={color} />
       ) : type === 'Feather' ? (
         <Feather onPress={onPress} name={name} size={size} color={color} />
       ) : type === 'AntDesign' ? (

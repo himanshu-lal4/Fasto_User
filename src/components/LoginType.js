@@ -1,102 +1,62 @@
-import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import styles from '../assets/theme/style';
 import {Card} from 'react-native-paper';
-import MaterialCommunityIcons from '../utils/VectorIcon';
+import VectorIcon from '../assets/VectorIcon/VectorIcon';
 import {COLORS, FONTS} from '../assets/theme';
+import auth from '@react-native-firebase/auth';
+import {useNavigation} from '@react-navigation/native';
+import featureFlag from './remoteConfig';
 import {
   GoogleSignin,
-  GoogleSigninButton,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import auth from '@react-native-firebase/auth';
-import {LoginManager, AccessToken} from 'react-native-fbsdk-next';
-import remoteConfig from '@react-native-firebase/remote-config';
-import {remoteConfigDefaults} from '../utils/remoteConfigDefaults';
-import messaging from '@react-native-firebase/messaging';
+import {AccessToken, LoginManager} from 'react-native-fbsdk-next';
+import {useDispatch} from 'react-redux';
+import {addUID} from '../redux/userTokenSlice';
+
 const LoginType = () => {
-  async function requestUserPermission() {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const isAppleLoginEnabled = featureFlag();
 
-    if (enabled) {
-      console.log('Authorization status:', authStatus);
-    }
-  }
-  const getToken = async () => {
-    const token = await messaging().getToken();
-    console.log('🚀 ~ getToken ~ token:', token);
-  };
-  const NotificationListener = () => {
-    messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log(
-        'notification caused app to open from background state',
-        remoteMessage.notification,
-      );
-    });
-
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage) {
-          console.log(
-            'notification caused app to open from quit state:',
-            remoteMessage.notification,
-          );
-        }
-      });
-    messaging().onMessage(async remoteMessage => {
-      console.log('notification on foreground stae....', remoteMessage);
-      const {title, body} = remoteMessage.notification;
-
-      // Display an alert with the title and body
-      Alert.alert(title, body);
-      // Alert.alert(JSON.stringify(remoteMessage));
-    });
-  };
-  useEffect(() => {
-    requestUserPermission();
-    getToken();
-    NotificationListener();
-  });
-  const [isAppleLoginBtn, setIsAppleLoginBtn] = useState(
-    remoteConfigDefaults.is_apple_login_btn,
-  );
-  const fetchRemoteConfig = async () => {
-    try {
-      await remoteConfig().setDefaults(remoteConfigDefaults);
-      await remoteConfig().fetch(10);
-      await remoteConfig().fetchAndActivate();
-
-      const isAppleLoginBtnValue =
-        remoteConfig().getValue('is_apple_login_btn')._value;
-      setIsAppleLoginBtn(isAppleLoginBtnValue);
-      console.log(isAppleLoginBtnValue);
-    } catch (error) {
-      console.error('Error fetching Remote Config:', error);
-    }
-  };
-  useEffect(() => {
-    fetchRemoteConfig();
-  }, []);
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
         '750688566312-2s51gk33qf9ju5e3mfied01npk0ho5eg.apps.googleusercontent.com',
     });
   }, []);
-  async function onGoogleButtonPress() {
-    await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
-    const {user, idToken} = await GoogleSignin.signIn();
-    console.log(user);
-    console.log(idToken);
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
 
-    return auth().signInWithCredential(googleCredential);
-  }
-  async function onFacebookButtonPress() {
+  //google Sign In
+  const googleSignInHandle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const {idToken} = await GoogleSignin.signIn();
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const {user} = await auth().signInWithCredential(googleCredential);
+      if (user.uid) {
+        dispatch(addUID(user.uid));
+        navigation.navigate('SellerScreen');
+      }
+
+      return;
+
+      // return auth().signInWithCredential(googleCredential);
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('user canceil the login flow');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('google sign in is in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log('play services not avaliable or outdated');
+      } else {
+        console.log(error);
+      }
+    }
+  };
+
+  //Facebook Sign In
+  const facebookSignInHandle = async () => {
     const result = await LoginManager.logInWithPermissions([
       'public_profile',
       'email',
@@ -115,62 +75,66 @@ const LoginType = () => {
     const facebookCredential = auth.FacebookAuthProvider.credential(
       data.accessToken,
     );
+    const {user} = await auth().signInWithCredential(facebookCredential);
+    if (user.uid) {
+      dispatch(addUID(user.uid));
+      navigation.navigate('SellerScreen');
+    }
+    return;
+  };
 
-    return auth().signInWithCredential(facebookCredential);
-  }
   return (
-    <View style={styles.authContainertext}>
-      <Card style={[styles.Card1, {backgroundColor: COLORS.graybackground}]}>
+    <View style={styles.cardContainer}>
+      <Card
+        style={[styles.Card1, {backgroundColor: COLORS.secondaryButtonColor}]}>
         <TouchableOpacity
           style={stylesPage.cardBox}
-          onPress={() => onFacebookButtonPress()}>
-          <MaterialCommunityIcons
+          onPress={() => {
+            facebookSignInHandle();
+          }}>
+          <VectorIcon
             name="facebook"
-            size={45}
-            color="rgb(23, 169, 253)"
+            size={50}
+            color="#3b5998"
             style={{}}
             type="MaterialCommunityIcons"
           />
-          <Text style={[FONTS.body3, {color: COLORS.white1, paddingLeft: 20}]}>
-            Continue with Facebook
-          </Text>
         </TouchableOpacity>
       </Card>
-      <Card style={[styles.Card1, {backgroundColor: COLORS.graybackground}]}>
+      <Card
+        style={[styles.Card1, {backgroundColor: COLORS.secondaryButtonColor}]}>
         <TouchableOpacity
           style={stylesPage.cardBox}
-          onPress={() => onGoogleButtonPress()}>
-          <MaterialCommunityIcons
-            name="google"
-            size={45}
-            color="white"
-            type="MaterialCommunityIcons"
+          onPress={() => {
+            googleSignInHandle();
+          }}>
+          <Image
+            style={{height: 50, width: 53}}
+            source={require('../assets/icons/Google.webp')}
           />
-          <Text style={[FONTS.body3, {color: COLORS.white1, paddingLeft: 20}]}>
-            Continue with Google
-          </Text>
         </TouchableOpacity>
       </Card>
-      {isAppleLoginBtn === 'true' ? (
-        <Card style={[styles.Card1, {backgroundColor: COLORS.graybackground}]}>
-          <TouchableOpacity
-            style={stylesPage.cardBox}
-            onPress={() => console.log('apple icon')}>
-            <MaterialCommunityIcons
-              name="apple"
-              size={45}
-              color="white"
-              type="MaterialCommunityIcons"
-            />
-            <Text
-              style={[FONTS.body3, {color: COLORS.white1, paddingLeft: 20}]}>
-              Continue with Apple
-            </Text>
-          </TouchableOpacity>
-        </Card>
-      ) : (
-        ''
-      )}
+
+      {isAppleLoginEnabled ? (
+        <>
+          <Card
+            style={[
+              styles.Card1,
+              {backgroundColor: COLORS.secondaryButtonColor},
+            ]}>
+            <TouchableOpacity
+              style={stylesPage.cardBox}
+              onPress={() => console.log('Apple icon')}>
+              <VectorIcon
+                name="apple"
+                size={50}
+                color="gray"
+                type="MaterialCommunityIcons"
+              />
+            </TouchableOpacity>
+          </Card>
+        </>
+      ) : null}
     </View>
   );
 };
