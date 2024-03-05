@@ -64,33 +64,22 @@ const SellerScreen = () => {
       });
   };
 
-  // Assuming you have Firebase initialized and the user is authenticated
-
-  // useEffect(() => {
-  //   console.log('inside live useEffect');
-  //   const user = firebase.auth().currentUser;
-
-  //   // Reference to the user document in Firestore
-  //   const userDocRef = firestore().collection('user').doc(currUserToken);
-
-  //   // Set up a real-time listener to get the updated user data
-  //   userDocRef.onSnapshot(snapshot => {
-  //     const userData = snapshot.data();
-  //     console.log('inside live snapshot ', snapshot);
-  //     // Check if the user has the 'seller' field
-  //     if (userData && userData.seller) {
-  //       const sellersData = userData.seller;
-
-  //       // Now sellersData contains all the sellers' data
-  //       console.log('seller data ', sellersData);
-  //     }
-  //   });
-  // }, []);
   async function func() {
     console.log('current user token ', currUserToken);
     const user = await firestore().collection('user').doc(currUserToken).get();
-    setSellerData(user.data().seller);
-    console.log('usestate seller data ', user.data().seller);
+
+    if (user.exists) {
+      // Check if the document exists
+      const sellerData = user.data().seller;
+
+      // Sort the seller array in descending order based on the 'id' field
+      const sortedSellerData = sellerData.reverse();
+
+      setSellerData(sortedSellerData);
+      console.log('usestate seller data ', sortedSellerData);
+    } else {
+      console.log('User document not found');
+    }
   }
 
   useEffect(() => {
