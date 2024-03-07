@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 
 import {
   Button,
@@ -21,7 +21,7 @@ import {useState} from 'react';
 
 import firestore from '@react-native-firebase/firestore';
 
-const RTCIndex = () => {
+const RTCIndex = ({navigation}) => {
   const [remoteStream, setRemoteStream] = useState(null);
 
   const [webcamStarted, setWebcamStarted] = useState(false);
@@ -70,7 +70,9 @@ const RTCIndex = () => {
       console.error('Error starting webcam:', error);
     }
   };
-
+  useEffect(() => {
+    startWebcam();
+  }, []);
   const startCall = async () => {
     const channelDoc = firestore().collection('channels').doc();
     const offerCandidates = channelDoc.collection('offerCandidates');
@@ -145,6 +147,17 @@ const RTCIndex = () => {
   console.log('🚀 ~ RTCIndex ~ remoteStream:', remoteStream);
   console.log(localStream?.toURL());
   console.log('🚀 ~ RTCIndex ~ localStream:', localStream);
+  const endCall = () => {
+    // Close the peer connection and reset states
+    if (pc.current) {
+      pc.current.close();
+    }
+    setLocalStream(null);
+    setRemoteStream(null);
+    setChannelId(null);
+    setWebcamStarted(false);
+    navigation.goBack();
+  };
   return (
     <KeyboardAvoidingView style={styles.body} behavior="position">
       <SafeAreaView>
@@ -166,9 +179,9 @@ const RTCIndex = () => {
           />
         )}
         <View style={styles.buttons}>
-          {!webcamStarted && (
+          {/* {!webcamStarted && (
             <Button title="Start webcam" onPress={startWebcam} />
-          )}
+          )} */}
           {webcamStarted && <Button title="Start call" onPress={startCall} />}
           {webcamStarted && (
             <View style={{flexDirection: 'row'}}>
@@ -180,6 +193,7 @@ const RTCIndex = () => {
                 style={{borderWidth: 1, padding: 5}}
                 onChangeText={newText => setChannelId(newText)}
               />
+              <Button title="End Call" onPress={endCall} />
             </View>
           )}
         </View>
