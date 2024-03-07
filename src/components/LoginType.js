@@ -34,27 +34,39 @@ const LoginType = () => {
       const {idToken} = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const {user} = await auth().signInWithCredential(googleCredential);
-      firestore()
-        .collection('user')
-        .doc(user.uid)
-        .set({
-          name: user.displayName,
-          email: user.email,
-          photoUrl: user.photoURL,
-          seller: [
-            {
-              id: '0',
-              data: {
-                email: 'deafult@gmail.com',
-                imageUrl: 'https://picsum.photos/id/1/5000/3333',
-                name: 'Add',
-              },
-            },
-          ],
-        })
-        .then(() => {
-          console.log('User added!');
-        });
+
+      const userDocRef = firestore().collection('user').doc(user.uid);
+
+      // Check if the user document already exists
+      userDocRef.get().then(docSnapshot => {
+        if (docSnapshot.exists) {
+          // User already exists, you can handle this case accordingly
+          console.log('User already exists!');
+        } else {
+          firestore()
+            .collection('user')
+            .doc(user.uid)
+            .set({
+              name: user.displayName,
+              email: user.email,
+              photoUrl: user.photoURL,
+              seller: [
+                {
+                  id: '0',
+                  data: {
+                    email: 'deafult@gmail.com',
+                    imageUrl: 'https://picsum.photos/id/1/5000/3333',
+                    name: 'Add',
+                  },
+                },
+              ],
+            })
+            .then(() => {
+              console.log('User added!');
+            });
+        }
+      });
+
       if (user.uid) {
         dispatch(addUID(user.uid));
       }

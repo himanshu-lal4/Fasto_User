@@ -19,6 +19,8 @@ import firestore from '@react-native-firebase/firestore';
 import {firebase} from '@react-native-firebase/auth';
 import CommonHeader from '../components/Common/CommonHeader';
 import {PermissionsAndroid} from 'react-native';
+import StartWebCam from '../components/WebRTC/StartWebCam';
+import {StartCall, startCall} from '../components/WebRTC/StartCall';
 
 const SellerScreen = () => {
   const navigation = useNavigation();
@@ -192,6 +194,8 @@ const SellerScreen = () => {
               style={styles.button}
               onPress={() => {
                 console.log('Calling action');
+
+                navigation.navigate('WebRTC');
                 setModalVisible(false);
               }}>
               <VectorIcon

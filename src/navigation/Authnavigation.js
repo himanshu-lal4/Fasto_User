@@ -15,6 +15,8 @@ import auth from '@react-native-firebase/auth';
 import StartUpScreen from '../screens/StartUpScreen';
 import {useDispatch} from 'react-redux';
 import {addUID} from '../redux/userTokenSlice';
+import {StartCall} from '../components/WebRTC/StartCall';
+import WebRTC from '../components/WebRTC/WebRTC';
 
 const Stack = createStackNavigator();
 
@@ -49,11 +51,12 @@ const Authnavigation = () => {
             <Stack.Screen name="SellerScreen" component={SellerScreen} />
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
+            <Stack.Screen name="WebRTC" component={WebRTC} />
           </>
         ) : (
           <>
-            <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="StartUpScreen" component={StartUpScreen} />
+            <Stack.Screen name="Login" component={Login} />
             <Stack.Screen
               name="LoginWithEmail_Password"
               component={LoginWithEmail_Password}
