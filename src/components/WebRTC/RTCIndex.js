@@ -23,6 +23,7 @@ import firestore from '@react-native-firebase/firestore';
 
 const RTCIndex = () => {
   const [remoteStream, setRemoteStream] = useState(null);
+
   const [webcamStarted, setWebcamStarted] = useState(false);
   const [localStream, setLocalStream] = useState(null);
   const [channelId, setChannelId] = useState(null);
@@ -40,27 +41,34 @@ const RTCIndex = () => {
   };
 
   const startWebcam = async () => {
-    pc.current = new RTCPeerConnection(servers);
-    const local = await mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-
-    setLocalStream(local);
-    const remote = new MediaStream();
-    setRemoteStream(remote);
-
-    local.getTracks().forEach(track => {
-      pc.current.addTrack(track, local);
-    });
-
-    pc.current.ontrack = event => {
-      event.streams[0].getTracks().forEach(track => {
-        remote.addTrack(track);
+    try {
+      const localStream = await mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
       });
-    };
 
-    setWebcamStarted(true);
+      console.log('Local Stream:', localStream);
+
+      setLocalStream(localStream);
+
+      pc.current = new RTCPeerConnection(servers); // Ensure pc.current is properly initialized
+
+      pc.current.ontrack = event => {
+        console.log('Received remote tracks:', event.track);
+        event.streams.forEach(stream => {
+          console.log('Received remote stream:', stream);
+          setRemoteStream(stream);
+        });
+      };
+
+      localStream.getTracks().forEach(track => {
+        pc.current.addTrack(track, localStream);
+      });
+
+      setWebcamStarted(true);
+    } catch (error) {
+      console.error('Error starting webcam:', error);
+    }
   };
 
   const startCall = async () => {
@@ -133,7 +141,10 @@ const RTCIndex = () => {
       });
     });
   };
-
+  console.log(remoteStream?.toURL());
+  console.log('🚀 ~ RTCIndex ~ remoteStream:', remoteStream);
+  console.log(localStream?.toURL());
+  console.log('🚀 ~ RTCIndex ~ localStream:', localStream);
   return (
     <KeyboardAvoidingView style={styles.body} behavior="position">
       <SafeAreaView>
@@ -149,7 +160,7 @@ const RTCIndex = () => {
         {remoteStream && (
           <RTCView
             streamURL={remoteStream?.toURL()}
-            style={styles.stream}
+            style={styles.RemoteStream}
             objectFit="cover"
             mirror
           />
@@ -187,8 +198,15 @@ const styles = StyleSheet.create({
   },
   stream: {
     flex: 2,
+    width: 100,
+    height: 100,
+    margin: 10,
+  },
+  RemoteStream: {
+    flex: 2,
     width: 200,
     height: 200,
+    margin: 10,
   },
   buttons: {
     alignItems: 'flex-start',
