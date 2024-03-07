@@ -2,6 +2,7 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, Button} from 'react-native';
 // import firebase from 'firebase';
+import firestore from '@react-native-firebase/firestore';
 import {RTCPeerConnection, RTCView, mediaDevices} from 'react-native-webrtc';
 
 // Initialize Firebase
@@ -52,6 +53,7 @@ const WebRTC = () => {
     const answerCandidates = callDocRef.collection('answerCandidates');
 
     callDocRef.set({initiator: true});
+    console.log('initiateCall');
 
     // Listen for remote answer
     peerConnection.ontrack = event => {
@@ -77,7 +79,6 @@ const WebRTC = () => {
         await peerConnection.setRemoteDescription(answerDescription);
       }
     });
-
     // Listen for remote ICE candidates
     answerCandidates.onSnapshot(snapshot => {
       snapshot.docChanges().forEach(async change => {
@@ -88,6 +89,10 @@ const WebRTC = () => {
       });
     });
   };
+
+  useEffect(() => {
+    initiateCall();
+  }, []);
 
   // UI
   return (
@@ -102,7 +107,7 @@ const WebRTC = () => {
           style={{width: 200, height: 200}}
         />
       </View>
-      <Button title="Initiate Call" onPress={initiateCall} />
+      {/* <Button title="Initiate Call" onPress={initiateCall} />/ */}
     </View>
   );
 };

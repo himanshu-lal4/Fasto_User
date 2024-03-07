@@ -17,6 +17,7 @@ import {useDispatch} from 'react-redux';
 import {addUID} from '../redux/userTokenSlice';
 import {StartCall} from '../components/WebRTC/StartCall';
 import WebRTC from '../components/WebRTC/WebRTC';
+import RTCIndex from '../components/WebRTC/RTCIndex';
 
 const Stack = createStackNavigator();
 
@@ -51,7 +52,8 @@ const Authnavigation = () => {
             <Stack.Screen name="SellerScreen" component={SellerScreen} />
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
-            <Stack.Screen name="WebRTC" component={WebRTC} />
+            {/* <Stack.Screen name="WebRTC" component={WebRTC} /> */}
+            <Stack.Screen name="RTCIndex" component={RTCIndex} />
           </>
         ) : (
           <>

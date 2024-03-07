@@ -195,7 +195,7 @@ const SellerScreen = () => {
               onPress={() => {
                 console.log('Calling action');
 
-                navigation.navigate('WebRTC');
+                navigation.navigate('RTCIndex');
                 setModalVisible(false);
               }}>
               <VectorIcon
