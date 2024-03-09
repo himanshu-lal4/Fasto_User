@@ -18,8 +18,11 @@ import {
   mediaDevices,
 } from 'react-native-webrtc';
 import {useState} from 'react';
-
 import firestore from '@react-native-firebase/firestore';
+import {Dimensions} from 'react-native';
+import {COLORS} from '../../assets/theme';
+import VectorIcon from '../../utils/VectorIcon';
+const {width, height} = Dimensions.get('window');
 
 const RTCIndex = ({navigation}) => {
   const [remoteStream, setRemoteStream] = useState(null);
@@ -160,23 +163,28 @@ const RTCIndex = ({navigation}) => {
   };
   return (
     <KeyboardAvoidingView style={styles.body} behavior="position">
-      <SafeAreaView>
+      <SafeAreaView style={styles.container}>
         {localStream && (
-          <RTCView
-            streamURL={localStream?.toURL()}
-            style={styles.stream}
-            objectFit="cover"
-            mirror
-          />
+          <View
+            style={remoteStream ? styles.joined : styles.localStreamContainer}>
+            <RTCView
+              streamURL={localStream?.toURL()}
+              style={styles.stream}
+              objectFit="cover"
+              mirror
+            />
+          </View>
         )}
 
         {remoteStream && (
-          <RTCView
-            streamURL={remoteStream?.toURL()}
-            style={styles.RemoteStream}
-            objectFit="cover"
-            mirror
-          />
+          <View style={styles.remoteStreamContainer}>
+            <RTCView
+              streamURL={remoteStream?.toURL()}
+              style={styles.RemoteStream}
+              objectFit="cover"
+              mirror
+            />
+          </View>
         )}
         <View style={styles.buttons}>
           {/* {!webcamStarted && (
@@ -184,7 +192,12 @@ const RTCIndex = ({navigation}) => {
           )} */}
           {webcamStarted && <Button title="Start call" onPress={startCall} />}
           {webcamStarted && (
-            <View style={{flexDirection: 'row'}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                marginBottom: 10,
+                alignSelf: 'center',
+              }}>
               <Button title="Join call" onPress={joinCall} />
               <TextInput
                 value={channelId}
@@ -193,7 +206,13 @@ const RTCIndex = ({navigation}) => {
                 style={{borderWidth: 1, padding: 5}}
                 onChangeText={newText => setChannelId(newText)}
               />
-              <Button title="End Call" onPress={endCall} />
+              <VectorIcon
+                name={'closecircle'}
+                type={'AntDesign'}
+                size={50}
+                color={'red'}
+                onPress={endCall}
+              />
             </View>
           )}
         </View>
@@ -204,23 +223,48 @@ const RTCIndex = ({navigation}) => {
 
 const styles = StyleSheet.create({
   body: {
-    backgroundColor: '#fff',
-
+    backgroundColor: COLORS.secondaryButtonColor,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    ...StyleSheet.absoluteFill,
+    width: width,
+    height: height,
+  },
+  container: {
+    width: width,
+    height: height,
+    zIndex: 1,
+  },
+  joined: {
+    flex: 1,
+    margin: 10,
+    width: width * 0.95,
+    height: height,
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  localStreamContainer: {
+    flex: 1,
+    margin: 10,
+    borderRadius: 15,
+    width: width * 0.95,
+    height: height,
+    borderRadius: 18,
+    overflow: 'hidden',
   },
   stream: {
-    flex: 2,
-    width: 100,
-    height: 100,
+    flex: 1,
+  },
+  remoteStreamContainer: {
+    flex: 1,
     margin: 10,
+    width: width * 0.95,
+    height: height,
+    borderRadius: 18,
+    overflow: 'hidden',
   },
   RemoteStream: {
-    flex: 2,
-    width: 200,
-    height: 200,
-    margin: 10,
+    flex: 1,
   },
   buttons: {
     alignItems: 'flex-start',
