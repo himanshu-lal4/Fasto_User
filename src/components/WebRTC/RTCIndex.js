@@ -23,8 +23,12 @@ import firestore from '@react-native-firebase/firestore';
 import {Dimensions} from 'react-native';
 import {COLORS} from '../../assets/theme';
 import VectorIcon from '../../utils/VectorIcon';
+import {useSelector} from 'react-redux';
 const {width, height} = Dimensions.get('window');
 const RTCIndex = ({route, navigation}) => {
+  const userUID = useSelector(state => state.userToken.UID);
+  console.log('🚀 ~ RTCIndex ~ userUID:', userUID);
+
   const {clickedSellerDeviceToken} = route.params;
   console.log(
     '🚀 ~ RTCIndex ~ clickedSellerDeviceToken:',
@@ -123,6 +127,7 @@ const RTCIndex = ({route, navigation}) => {
       },
       data: {
         channelId: `${channelId}`,
+        userUID: userUID,
         // Add more key-value pairs as needed
       },
     };
