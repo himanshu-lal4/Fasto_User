@@ -21,12 +21,20 @@ import {useState} from 'react';
 
 import firestore from '@react-native-firebase/firestore';
 
-const RTCIndex = ({navigation}) => {
+const RTCIndex = ({route, navigation}) => {
+  const {clickedSellerDeviceToken} = route.params;
+  console.log(
+    '🚀 ~ RTCIndex ~ clickedSellerDeviceToken:',
+    clickedSellerDeviceToken,
+  );
+
   const [remoteStream, setRemoteStream] = useState(null);
 
   const [webcamStarted, setWebcamStarted] = useState(false);
   const [localStream, setLocalStream] = useState(null);
   const [channelId, setChannelId] = useState(null);
+  //  const [clickedSellerDeviceToken, setClickedSellerDeviceToken] =
+  //    useState(null);
   const pc = useRef();
   const servers = {
     iceServers: [
@@ -68,6 +76,69 @@ const RTCIndex = ({navigation}) => {
       console.error('Error starting webcam:', error);
     }
   };
+  // async function setDeviceToken(itemId) {
+  //   await firestore()
+  //     .collection('Sellers')
+  //     .doc(itemId)
+  //     .get()
+  //     .then(doc => {
+  //       if (doc.exists) {
+  //         // Document data is available in doc.data()
+  //         const sellerData = doc.data();
+  //         // console.log('Seller Data:', sellerData.deviceToken);
+  //         // sellerFcmToken = sellerData.deviceToken;
+  //         setClickedSellerDeviceToken(sellerData.deviceToken);
+  //       } else {
+  //         console.log('No such document!');
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error('Error getting seller document:', error);
+  //     });
+  // }
+  async function handleCallNotification(channelId) {
+    console.log('<==========handleCallNotification==========>');
+    console.log('clickedSellerDeviceToken--->', clickedSellerDeviceToken);
+    console.log('channelId---->', channelId);
+    // const message = {
+    //   to: clickedSellerDeviceToken,
+    //   notification: {
+    //     title: '📲Fasto user Calling',
+    //     body: '📞📞Call from a fasto user📞📞',
+    //   },
+    //   data: {
+    //     // You can include additional data if needed
+    //     // ...
+    //     channelId: channelId,
+    //   },
+    // };
+    const message = {
+      to: clickedSellerDeviceToken,
+      notification: {
+        title: '📲Fasto user Calling',
+        body: '📞📞Call from a fasto user📞📞',
+      },
+      data: {
+        channelId: `${channelId}`,
+        // Add more key-value pairs as needed
+      },
+    };
+
+    console.log(
+      'handleCallNotificationClickedSellerDeviceToken----------->',
+      clickedSellerDeviceToken,
+    );
+    await fetch('https://fcm.googleapis.com/fcm/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
+      },
+      body: JSON.stringify(message),
+    });
+  }
+
   useEffect(() => {
     startWebcam();
   }, []);
@@ -105,6 +176,7 @@ const RTCIndex = ({navigation}) => {
         }
       });
     });
+    await handleCallNotification(channelDoc.id);
   };
 
   const joinCall = async () => {

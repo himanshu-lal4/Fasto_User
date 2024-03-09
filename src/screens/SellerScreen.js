@@ -193,35 +193,35 @@ const SellerScreen = () => {
   //   },
   // };
 
-  async function handleCallNotification() {
-    console.log('<==========handleCallNotification==========>');
-    console.log('clickedSellerDeviceToken--->', clickedSellerDeviceToken);
+  // async function handleCallNotification() {
+  //   console.log('<==========handleCallNotification==========>');
+  //   console.log('clickedSellerDeviceToken--->', clickedSellerDeviceToken);
 
-    const message = {
-      to: clickedSellerDeviceToken,
-      notification: {
-        title: '📲Fasto user Calling',
-        body: '📞📞Call from a fasto user📞📞',
-      },
-      data: {
-        // You can include additional data if needed
-        // ...
-      },
-    };
-    console.log(
-      'handleCallNotificationClickedSellerDeviceToken----------->',
-      clickedSellerDeviceToken,
-    );
-    await fetch('https://fcm.googleapis.com/fcm/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization:
-          'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
-      },
-      body: JSON.stringify(message),
-    });
-  }
+  //   const message = {
+  //     to: clickedSellerDeviceToken,
+  //     notification: {
+  //       title: '📲Fasto user Calling',
+  //       body: '📞📞Call from a fasto user📞📞',
+  //     },
+  //     data: {
+  //       // You can include additional data if needed
+  //       // ...
+  //     },
+  //   };
+  //   console.log(
+  //     'handleCallNotificationClickedSellerDeviceToken----------->',
+  //     clickedSellerDeviceToken,
+  //   );
+  //   await fetch('https://fcm.googleapis.com/fcm/send', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization:
+  //         'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
+  //     },
+  //     body: JSON.stringify(message),
+  //   });
+  // }
 
   // Call the function to send the notification
   return (
@@ -260,8 +260,8 @@ const SellerScreen = () => {
               style={styles.button}
               onPress={() => {
                 console.log('Calling action');
-                handleCallNotification();
-                navigation.navigate('RTCIndex');
+                // handleCallNotification();
+                navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
                 setModalVisible(false);
               }}>
               <VectorIcon
