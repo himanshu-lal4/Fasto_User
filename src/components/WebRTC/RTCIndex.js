@@ -47,8 +47,6 @@ const RTCIndex = ({navigation}) => {
         audio: true,
       });
 
-      console.log('Local Stream:', localStream);
-
       setLocalStream(localStream);
 
       pc.current = new RTCPeerConnection(servers); // Ensure pc.current is properly initialized
@@ -143,10 +141,6 @@ const RTCIndex = ({navigation}) => {
       });
     });
   };
-  console.log(remoteStream?.toURL());
-  console.log('🚀 ~ RTCIndex ~ remoteStream:', remoteStream);
-  console.log(localStream?.toURL());
-  console.log('🚀 ~ RTCIndex ~ localStream:', localStream);
   const endCall = () => {
     // Close the peer connection and reset states
     if (pc.current) {

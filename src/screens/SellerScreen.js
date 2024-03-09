@@ -25,7 +25,9 @@ import {StartCall, startCall} from '../components/WebRTC/StartCall';
 const SellerScreen = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [clickedSeller, setClickedSeller] = useState(null);
+  const [clickedSellerDeviceToken, setClickedSellerDeviceToken] =
+    useState(null);
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -56,7 +58,6 @@ const SellerScreen = () => {
   const [sellerData, setSellerData] = useState([]);
   const userToken = useSelector(state => state.userId.UID);
   const currUserToken = useSelector(state => state.userToken.UID);
-  console.log('scanned user token ', userToken);
 
   const addNewSeller = async () => {
     try {
@@ -70,11 +71,12 @@ const SellerScreen = () => {
             name: userData.name,
             imageUrl: userData.photoUrl,
             email: userData.email,
+            OS: userData.OS,
           },
         };
 
         await firestore()
-          .collection('user')
+          .collection('Users')
           .doc(currUserToken)
           .update({
             seller: firestore.FieldValue.arrayUnion(obj),
@@ -91,9 +93,8 @@ const SellerScreen = () => {
 
   const fetchUserData = async () => {
     try {
-      console.log('current user token ', currUserToken);
       const user = await firestore()
-        .collection('user')
+        .collection('Users')
         .doc(currUserToken)
         .get();
 
@@ -102,7 +103,6 @@ const SellerScreen = () => {
         const sortedSellerData = sellerData ? sellerData.reverse() : [];
 
         setSellerData(sortedSellerData);
-        console.log('usestate seller data ', sortedSellerData);
       } else {
         console.log('User document not found');
       }
@@ -113,11 +113,8 @@ const SellerScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // console.log('Calling addNewSeller');
         await addNewSeller();
-        // console.log('Calling fetchUserData');
         await fetchUserData();
-        // console.log('useeffect');
       } catch (error) {
         console.error('Error in useEffect:', error);
       }
@@ -125,9 +122,28 @@ const SellerScreen = () => {
 
     fetchData();
   }, [userToken]);
+  async function setDeviceToken(itemId) {
+    await firestore()
+      .collection('Sellers')
+      .doc(itemId)
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          // Document data is available in doc.data()
+          const sellerData = doc.data();
+          // console.log('Seller Data:', sellerData.deviceToken);
+          // sellerFcmToken = sellerData.deviceToken;
+          setClickedSellerDeviceToken(sellerData.deviceToken);
+        } else {
+          console.log('No such document!');
+        }
+      })
+      .catch(error => {
+        console.error('Error getting seller document:', error);
+      });
+  }
 
   const renderItem = ({item}) => {
-    console.log(item.id);
     return item.id == 0 ? (
       <TouchableOpacity
         key={item.id}
@@ -148,6 +164,10 @@ const SellerScreen = () => {
         key={item.id}
         style={styles.rootImgContainer}
         onPress={() => {
+          // setClickedSeller(item.id);
+          console.log('itemId---------->', item.id);
+          setDeviceToken(item.id);
+          console.log('itemId---------->', item.id);
           setModalVisible(true);
         }}>
         <View style={styles.imgContainer}>
@@ -158,6 +178,52 @@ const SellerScreen = () => {
     );
   };
 
+  // const sellerFcmToken =
+  //   'emeV5Te3QWeotU0S4Vx_WR:APA91bEQdEaRk6oUpzE35aa9Zw_PmMwUp6QdPvKLgxMproXA3XcZy8BLLusL0FCHX8XjINivdt7-gaa5NActmUMmEltB4IH9qSDROdxgcU6ITf1_iDBrZV2XOzsU75lTFCdgWv2ylqfw'; // Replace with the actual seller's FCM token
+
+  // const message = {
+  //   to: sellerFcmToken,
+  //   notification: {
+  //     title: 'User App Notification',
+  //     body: 'This is a notification from the user app to the seller app.',
+  //   },
+  //   data: {
+  //     // You can include additional data if needed
+  //     // ...
+  //   },
+  // };
+
+  async function handleCallNotification() {
+    console.log('<==========handleCallNotification==========>');
+    console.log('clickedSellerDeviceToken--->', clickedSellerDeviceToken);
+
+    const message = {
+      to: clickedSellerDeviceToken,
+      notification: {
+        title: '📲Fasto user Calling',
+        body: '📞📞Call from a fasto user📞📞',
+      },
+      data: {
+        // You can include additional data if needed
+        // ...
+      },
+    };
+    console.log(
+      'handleCallNotificationClickedSellerDeviceToken----------->',
+      clickedSellerDeviceToken,
+    );
+    await fetch('https://fcm.googleapis.com/fcm/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
+      },
+      body: JSON.stringify(message),
+    });
+  }
+
+  // Call the function to send the notification
   return (
     <SafeAreaView style={styles.rootContainer}>
       <CommonHeader title={'dashboard'} />
@@ -194,7 +260,7 @@ const SellerScreen = () => {
               style={styles.button}
               onPress={() => {
                 console.log('Calling action');
-
+                handleCallNotification();
                 navigation.navigate('RTCIndex');
                 setModalVisible(false);
               }}>

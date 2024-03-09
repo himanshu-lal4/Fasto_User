@@ -13,10 +13,8 @@ const featureFlag = () => {
       .remoteConfig()
       .getValue('appleLogin')
       .asBoolean();
-    console.log('appleLoginConfig:', appleLoginConfig);
     setIsAppleLoginEnabled(appleLoginConfig);
   };
-  console.log(isAppleLoginEnabled);
   useEffect(() => {
     fetchRemoteConfig();
   }, []);
