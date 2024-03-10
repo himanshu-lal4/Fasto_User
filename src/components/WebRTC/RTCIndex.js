@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 
 import {
+  BackHandler,
   Button,
   KeyboardAvoidingView,
   SafeAreaView,
@@ -232,6 +233,22 @@ const RTCIndex = ({route, navigation}) => {
     setWebcamStarted(false);
     navigation.goBack();
   };
+
+  useEffect(() => {
+    const backAction = () => {
+      console.log('Back button pressed');
+      endCall();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove(); // Remove the event listener on component unmount
+  }, []);
+
   return (
     <KeyboardAvoidingView style={styles.body} behavior="position">
       <SafeAreaView style={styles.container}>
