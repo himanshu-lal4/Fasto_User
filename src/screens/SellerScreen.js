@@ -21,6 +21,8 @@ import CommonHeader from '../components/Common/CommonHeader';
 import {PermissionsAndroid} from 'react-native';
 import StartWebCam from '../components/WebRTC/StartWebCam';
 import {StartCall, startCall} from '../components/WebRTC/StartCall';
+import {Dimensions} from 'react-native';
+const {width, height} = Dimensions.get('window');
 
 const SellerScreen = () => {
   const navigation = useNavigation();
@@ -157,7 +159,7 @@ const SellerScreen = () => {
             style={styles.iconOpacity}
           />
         </View>
-        <Text style={styles.text}>{item.data.name}</Text>
+        <Text style={[FONTS.body3, styles.text]}>{item.data.name}</Text>
       </TouchableOpacity>
     ) : (
       <TouchableOpacity
@@ -173,7 +175,7 @@ const SellerScreen = () => {
         <View style={styles.imgContainer}>
           <Image style={styles.img} source={{uri: item.data.imageUrl}} />
         </View>
-        <Text style={[FONTS.h4, styles.text]}>{item.data.name}</Text>
+        <Text style={[FONTS.body3, styles.text]}>{item.data.name}</Text>
       </TouchableOpacity>
     );
   };
@@ -226,76 +228,79 @@ const SellerScreen = () => {
   // Call the function to send the notification
   return (
     <SafeAreaView style={styles.rootContainer}>
-      <CommonHeader title={'dashboard'} />
-      <View style={styles.textInputContainer}>
-        <VectorIcon
-          name="search"
-          color={COLORS.darkBlue}
-          size={25}
-          style={styles.iconOpacity}
-        />
-        <TextInput style={styles.textInput} placeholder="Search..." />
+      <View style={styles.headerContainer}>
+        <CommonHeader title={'dashboard'} />
       </View>
-      <FlatList
-        contentContainerStyle={{
-          marginTop: 20,
-          alignItems: 'center',
-        }}
-        data={sellerData}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        numColumns={3}
-      />
-      <Modal
-        animationType="slide"
-        transparent={true}
-        style={styles.Modal}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                console.log('Calling action');
-                // handleCallNotification();
-                navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
-                setModalVisible(false);
-              }}>
-              <VectorIcon
-                name={'call'}
-                type={'Ionicons'}
-                size={25}
-                color={COLORS.darkBlue}
-              />
-            </TouchableOpacity>
+      <View style={styles.mainContainer}>
+        <Text style={[FONTS.body2, styles.text2]}>
+          Hello user,{'\uD83D\uDC4B'}
+        </Text>
+        <Text style={[FONTS.body5, styles.text2, {paddingTop: '3%'}]}>
+          Choose your seller for the day!
+        </Text>
+        <FlatList
+          contentContainerStyle={{
+            marginTop: '10%',
+            alignItems: 'center',
+          }}
+          data={sellerData}
+          renderItem={renderItem}
+          keyExtractor={item => item.id.toString()}
+          numColumns={3}
+        />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          style={styles.Modal}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  console.log('Calling action');
+                  // handleCallNotification();
+                  navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
+                  setModalVisible(false);
+                }}>
+                <VectorIcon
+                  name={'call'}
+                  type={'Ionicons'}
+                  size={25}
+                  color={COLORS.white}
+                />
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                console.log('Messaging action');
-                setModalVisible(false);
-              }}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  console.log('Messaging action');
+                  setModalVisible(false);
+                }}>
+                <VectorIcon
+                  name={'android-messages'}
+                  type={'MaterialCommunityIcons'}
+                  size={25}
+                  color={COLORS.white}
+                />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.cross}>
               <VectorIcon
-                name={'android-messages'}
-                type={'MaterialCommunityIcons'}
-                size={25}
+                name={'cross'}
+                type={'Entypo'}
+                size={30}
+                style={styles.closeButton}
                 color={COLORS.darkBlue}
+                onPress={() => setModalVisible(false)}
               />
             </TouchableOpacity>
           </View>
-          <VectorIcon
-            name={'cross'}
-            type={'Entypo'}
-            size={30}
-            style={styles.closeButton}
-            color={COLORS.darkBlue}
-            onPress={() => setModalVisible(false)}
-          />
-        </View>
-      </Modal>
+        </Modal>
+      </View>
     </SafeAreaView>
   );
 };
@@ -305,34 +310,39 @@ export default SellerScreen;
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    // paddingVertical: 20,
+    // paddingHorizontal: 10,
+    backgroundColor: COLORS.secondaryBackground,
+    height: height,
+    width: width,
+  },
+  headerContainer: {
     backgroundColor: COLORS.white,
+    paddingHorizontal: 5,
+    paddingTop: 10,
   },
-  textInputContainer: {
-    marginTop: 20,
-    marginHorizontal: 10,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    width: '95%',
-    borderWidth: 1,
-    borderColor: COLORS.darkBlue,
-    borderRadius: 40,
-    alignItems: 'center',
+  mainContainer: {
+    backgroundColor: COLORS.white,
+    marginVertical: '3%',
+    marginHorizontal: '2%',
+    paddingVertical: '5%',
+    borderRadius: 10,
+    overflow: 'hidden',
   },
-  textInput: {
-    flex: 1,
-    height: 40,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    fontSize: 18,
+  text: {
+    marginTop: 5,
+    color: COLORS.darkBlue,
+    fontSize: 16,
   },
-  text: {marginTop: 5, color: COLORS.darkBlue, fontSize: 16},
+  text2: {
+    color: COLORS.darkBlue,
+    textAlign: 'center',
+  },
   img: {width: '100%', height: '100%'},
   iconOpacity: {opacity: 0.7},
   addIconContainer: {
-    width: 90,
-    height: 90,
+    width: 70,
+    height: 70,
     borderRadius: 45,
     overflow: 'hidden',
     borderColor: COLORS.darkBlue,
@@ -343,13 +353,13 @@ const styles = StyleSheet.create({
   },
   rootImgContainer: {
     marginTop: 5,
-    paddingHorizontal: '3.6%',
+    paddingHorizontal: '3.4%',
     paddingVertical: 10,
     alignItems: 'center',
   },
   imgContainer: {
-    width: 90,
-    height: 90,
+    width: 70,
+    height: 70,
     borderRadius: 45,
     overflow: 'hidden',
     elevation: 5, // This property is for Android
@@ -360,7 +370,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.secondaryBackground,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingVertical: 80,
@@ -369,10 +379,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   button: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.darkBlue,
     borderWidth: 1.5,
-    borderColor: COLORS.darkBlue,
-    borderRadius: 30,
+    borderColor: COLORS.white,
+    borderRadius: 15,
     paddingVertical: 10,
     paddingHorizontal: 30,
     elevation: 3.5,
@@ -381,9 +391,40 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
   },
-  closeButton: {
+  cross: {
     position: 'absolute',
-    bottom: 170,
-    right: 5,
+    bottom: '21%',
+    right: 0,
+    padding: '2%',
   },
+  // textInputContainer: {
+  //   marginTop: 20,
+  //   marginHorizontal: 10,
+  //   paddingHorizontal: 10,
+  //   flexDirection: 'row',
+  //   width: '95%',
+  //   borderWidth: 1,
+  //   borderColor: COLORS.darkBlue,
+  //   borderRadius: 40,
+  //   alignItems: 'center',
+  // },
+  // textInput: {
+  //   flex: 1,
+  //   height: 40,
+  //   paddingVertical: 5,
+  //   paddingHorizontal: 10,
+  //   fontSize: 18,
+  // },
 });
+
+{
+  /* <View style={styles.textInputContainer}>
+        <VectorIcon
+          name="search"
+          color={COLORS.darkBlue}
+          size={25}
+          style={styles.iconOpacity}
+        />
+        <TextInput style={styles.textInput} placeholder="Search..." />
+      </View> */
+}

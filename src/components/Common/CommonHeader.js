@@ -19,6 +19,7 @@ const CommonHeader = ({title}) => {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        backgroundColor: COLORS.white,
       }}>
       <View>
         <Text
