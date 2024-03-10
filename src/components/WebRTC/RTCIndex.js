@@ -19,7 +19,6 @@ import {
   mediaDevices,
 } from 'react-native-webrtc';
 import {useState} from 'react';
-
 import firestore from '@react-native-firebase/firestore';
 import {Dimensions} from 'react-native';
 import {COLORS} from '../../assets/theme';
