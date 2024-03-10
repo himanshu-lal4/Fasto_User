@@ -9,7 +9,6 @@ import {useSelector} from 'react-redux';
 
 const Qr_codeScreen = () => {
   const userToken = useSelector(state => state.userToken.UID);
-  console.log('🚀 ~ userToken:', userToken);
 
   const [text, setText] = useState('');
   const [QRImage, setQRImage] = useState('');
@@ -22,7 +21,6 @@ const Qr_codeScreen = () => {
       ref.current.toDataURL(async data => {
         const path =
           RNFetchBlob.fs.dirs.DownloadDir + `/${text.slice(0, 30)}.png`;
-        console.log(path);
         await RNFetchBlob.fs.writeFile(path, data, 'base64');
         alert('download successfully');
       });

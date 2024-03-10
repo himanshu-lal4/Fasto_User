@@ -27,7 +27,6 @@ const Authnavigation = () => {
   useEffect(() => {
     const unregister = auth().onAuthStateChanged(userExist => {
       if (userExist) {
-        // console.log('user exist', userExist.uid);
         dispatch(addUID(userExist.uid));
         setUser(userExist);
       } else {

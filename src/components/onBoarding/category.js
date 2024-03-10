@@ -21,7 +21,6 @@ const CategoryScreen = () => {
 
   const handleCategorySelection = category => {
     setSelectedCategory(category);
-    console.log('category', selectedCategory);
   };
 
   const handleContinue = () => {

@@ -64,7 +64,6 @@ const LoginWithEmail_Password = () => {
     auth()
       .signInWithEmailAndPassword(email, password)
       .then(userCredential => {
-        // console.log('User loggesd in Successfully', userCredential);
         const userToken = userCredential.user.uid;
 
         if (userToken) {
@@ -79,7 +78,6 @@ const LoginWithEmail_Password = () => {
 
   const handleSubmit = (values, actions) => {
     if (values) {
-      // console.log(values);
       // createUserWithEmailPassword(values.email, values.password);
       signInUser(values.email, values.password);
       actions.resetForm();
