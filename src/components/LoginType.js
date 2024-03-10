@@ -53,6 +53,9 @@ const LoginType = () => {
       userDocRef.get().then(docSnapshot => {
         if (docSnapshot.exists) {
           // User already exists, you can handle this case accordingly
+          dispatch(addUID(user.uid));
+          console.log('googleUID------->', user.uid);
+          navigation.navigate('SellerScreen');
           console.log('User already exists!');
         } else {
           firestore()
@@ -76,14 +79,13 @@ const LoginType = () => {
               ],
             })
             .then(() => {
+              dispatch(addUID(user.uid));
+              console.log('googleUID------->', user.uid);
+              navigation.navigate('SellerScreen');
               console.log('User added!');
             });
         }
       });
-
-      if (user.uid) {
-        dispatch(addUID(user.uid));
-      }
 
       return;
 
