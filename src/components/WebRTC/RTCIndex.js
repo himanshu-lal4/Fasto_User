@@ -235,6 +235,15 @@ const RTCIndex = ({route, navigation}) => {
   };
 
   useEffect(() => {
+    const startCallAutomatically = async () => {
+      await startWebcam();
+      await startCall();
+    };
+
+    startCallAutomatically();
+  }, []);
+
+  useEffect(() => {
     const backAction = () => {
       console.log('Back button pressed');
       endCall();
@@ -278,7 +287,7 @@ const RTCIndex = ({route, navigation}) => {
           {/* {!webcamStarted && (
             <Button title="Start webcam" onPress={startWebcam} />
           )} */}
-          {webcamStarted && <Button title="Start call" onPress={startCall} />}
+          {/* {webcamStarted && <Button title="Start call" onPress={startCall} />} */}
           {webcamStarted && (
             <View
               style={{
@@ -286,14 +295,14 @@ const RTCIndex = ({route, navigation}) => {
                 marginBottom: 10,
                 alignSelf: 'center',
               }}>
-              <Button title="Join call" onPress={joinCall} />
-              <TextInput
+              {/* <Button title="Join call" onPress={joinCall} /> */}
+              {/* <TextInput
                 value={channelId}
                 placeholder="callId"
                 minLength={45}
                 style={{borderWidth: 1, padding: 5}}
                 onChangeText={newText => setChannelId(newText)}
-              />
+              /> */}
               <VectorIcon
                 name={'closecircle'}
                 type={'AntDesign'}
