@@ -170,9 +170,9 @@ const RTCIndex = ({route, navigation}) => {
 
     const unsubscribe = channelDoc.onSnapshot(snapshot => {
       const data = snapshot.data();
-      if (data && data.receiver === false) {
-        navigation.goBack(); 
-        unsubscribe(); 
+      if (data && data.seller === false) {
+        endCall();
+        unsubscribe();
       }
     });
 
@@ -193,8 +193,8 @@ const RTCIndex = ({route, navigation}) => {
       });
     });
     await channelDoc.update({
-      sender: true,
-      receiver: true,
+      user: true,
+      seller: true,
     });
     await handleCallNotification(channelDoc.id);
   };
@@ -233,6 +233,7 @@ const RTCIndex = ({route, navigation}) => {
       });
     });
   };
+
   const endCall = async () => {
     // Close the peer connection and reset states
     if (pc.current) {
@@ -247,7 +248,7 @@ const RTCIndex = ({route, navigation}) => {
     if (channelId) {
       const channelDoc = firestore().collection('channels').doc(channelId);
       await channelDoc.update({
-        receiver: false,
+        user: false,
       });
     }
   };
