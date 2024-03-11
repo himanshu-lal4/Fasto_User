@@ -5,12 +5,16 @@ import {COLORS, FONTS} from '../../assets/theme';
 import styles from '../../assets/theme/style';
 import VectorIcon from '../../utils/VectorIcon';
 import {firebase} from '@react-native-firebase/auth';
+import {useDispatch} from 'react-redux';
+import {addUID} from '../../redux/userTokenSlice';
 
 const CommonHeader = ({title}) => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const handleLogoutPress = () => {
-    firebase.auth().signOut();
+    // firebase.auth().signOut();
+    dispatch(addUID(null));
   };
 
   return (
@@ -19,6 +23,7 @@ const CommonHeader = ({title}) => {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        backgroundColor: COLORS.white,
       }}>
       <View>
         <Text

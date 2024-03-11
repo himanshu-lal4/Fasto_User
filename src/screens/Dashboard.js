@@ -6,7 +6,6 @@ import {useSelector} from 'react-redux';
 
 const Dashboard = ({navigation}) => {
   const uid = useSelector(state => state.userId.UserId);
-  console.log('scanner', uid);
   return (
     <View>
       <Button

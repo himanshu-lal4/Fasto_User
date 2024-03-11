@@ -17,6 +17,8 @@ import {COLORS, FONTS} from '../assets/theme';
 import AuthHeader from '../components/Common/AuthHeader';
 import {Checkbox} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
 import {AccessToken, LoginManager} from 'react-native-fbsdk-next';
 import {
   GoogleSignin,
@@ -60,26 +62,61 @@ const LoginWithEmail_Password = () => {
   const navigation = useNavigation();
   const [checked, setChecked] = useState(false);
 
-  const signInUser = (email, password) => {
-    auth()
-      .signInWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        // console.log('User loggesd in Successfully', userCredential);
-        const userToken = userCredential.user.uid;
+  const signInUser = async (email, password) => {
+    try {
+      const userCredential = await auth().signInWithEmailAndPassword(
+        email,
+        password,
+      );
+      const userToken = userCredential.user.uid;
+      const userDocRef = firestore().collection('Users').doc(userToken);
+      const token = await messaging().getToken();
 
-        if (userToken) {
-          // dispatch(addUID(userToken));
-          navigation.navigate('SellerScreen');
-        }
-      })
-      .catch(error => {
-        console.log('error while login ' + error);
-      });
+      // Check if the user document already exists
+      const docSnapshot = await userDocRef.get();
+
+      if (docSnapshot.exists) {
+        // User already exists, handle this case accordingly
+        dispatch(addUID(userToken));
+        navigation.navigate('SellerScreen');
+        console.log('User already exists!');
+      } else {
+        // User does not exist, create a new document
+        await firestore()
+          .collection('Users')
+          .doc(userToken)
+          .set({
+            email: email,
+            deviceToken: token,
+            OS: Platform.OS,
+            seller: [
+              {
+                id: '0',
+                data: {
+                  email: 'deafult@gmail.com',
+                  imageUrl: 'https://picsum.photos/id/1/5000/3333',
+                  name: 'Add',
+                },
+              },
+            ],
+          });
+
+        dispatch(addUID(userToken));
+        navigation.navigate('SellerScreen');
+        console.log('User added!');
+      }
+
+      if (userToken) {
+        dispatch(addUID(userToken));
+        navigation.navigate('SellerScreen');
+      }
+    } catch (error) {
+      console.log('error while login ' + error);
+    }
   };
 
   const handleSubmit = (values, actions) => {
     if (values) {
-      // console.log(values);
       // createUserWithEmailPassword(values.email, values.password);
       signInUser(values.email, values.password);
       actions.resetForm();

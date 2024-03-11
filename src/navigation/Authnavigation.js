@@ -13,22 +13,28 @@ import QRScanner from '../screens/QRScanner';
 import SellerScreen from '../screens/SellerScreen';
 import auth from '@react-native-firebase/auth';
 import StartUpScreen from '../screens/StartUpScreen';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {addUID} from '../redux/userTokenSlice';
+import {StartCall} from '../components/WebRTC/StartCall';
+import WebRTC from '../components/WebRTC/WebRTC';
+import RTCIndex from '../components/WebRTC/RTCIndex';
 
 const Stack = createStackNavigator();
 
 const Authnavigation = () => {
-  const [user, setUser] = useState('');
+  // const [user, setUser] = useState('');
   const dispatch = useDispatch();
+  const user = useSelector(state => state.userToken.UID);
+  console.log('🚀 ~ Authnavigation ~ user:', user);
+
   useEffect(() => {
     const unregister = auth().onAuthStateChanged(userExist => {
       if (userExist) {
-        // console.log('user exist', userExist.uid);
+        console.log('userExist.uid firebaseonAuth----->', userExist.uid);
         dispatch(addUID(userExist.uid));
-        setUser(userExist);
+        // setUser(userExist);
       } else {
-        setUser('');
+        // setUser('');
       }
     });
     return () => {
@@ -49,11 +55,13 @@ const Authnavigation = () => {
             <Stack.Screen name="SellerScreen" component={SellerScreen} />
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
+            {/* <Stack.Screen name="WebRTC" component={WebRTC} /> */}
+            <Stack.Screen name="RTCIndex" component={RTCIndex} />
           </>
         ) : (
           <>
-            <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="StartUpScreen" component={StartUpScreen} />
+            <Stack.Screen name="Login" component={Login} />
             <Stack.Screen
               name="LoginWithEmail_Password"
               component={LoginWithEmail_Password}

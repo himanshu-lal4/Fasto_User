@@ -19,11 +19,17 @@ import firestore from '@react-native-firebase/firestore';
 import {firebase} from '@react-native-firebase/auth';
 import CommonHeader from '../components/Common/CommonHeader';
 import {PermissionsAndroid} from 'react-native';
+import StartWebCam from '../components/WebRTC/StartWebCam';
+import {StartCall, startCall} from '../components/WebRTC/StartCall';
+import {Dimensions} from 'react-native';
+const {width, height} = Dimensions.get('window');
 
 const SellerScreen = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [clickedSeller, setClickedSeller] = useState(null);
+  const [clickedSellerDeviceToken, setClickedSellerDeviceToken] =
+    useState(null);
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -54,7 +60,6 @@ const SellerScreen = () => {
   const [sellerData, setSellerData] = useState([]);
   const userToken = useSelector(state => state.userId.UID);
   const currUserToken = useSelector(state => state.userToken.UID);
-  console.log('scanned user token ', userToken);
 
   const addNewSeller = async () => {
     try {
@@ -68,11 +73,12 @@ const SellerScreen = () => {
             name: userData.name,
             imageUrl: userData.photoUrl,
             email: userData.email,
+            OS: userData.OS,
           },
         };
 
         await firestore()
-          .collection('user')
+          .collection('Users')
           .doc(currUserToken)
           .update({
             seller: firestore.FieldValue.arrayUnion(obj),
@@ -89,9 +95,8 @@ const SellerScreen = () => {
 
   const fetchUserData = async () => {
     try {
-      console.log('current user token ', currUserToken);
       const user = await firestore()
-        .collection('user')
+        .collection('Users')
         .doc(currUserToken)
         .get();
 
@@ -100,7 +105,6 @@ const SellerScreen = () => {
         const sortedSellerData = sellerData ? sellerData.reverse() : [];
 
         setSellerData(sortedSellerData);
-        console.log('usestate seller data ', sortedSellerData);
       } else {
         console.log('User document not found');
       }
@@ -111,11 +115,8 @@ const SellerScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // console.log('Calling addNewSeller');
         await addNewSeller();
-        // console.log('Calling fetchUserData');
         await fetchUserData();
-        // console.log('useeffect');
       } catch (error) {
         console.error('Error in useEffect:', error);
       }
@@ -123,9 +124,28 @@ const SellerScreen = () => {
 
     fetchData();
   }, [userToken]);
+  async function setDeviceToken(itemId) {
+    await firestore()
+      .collection('Sellers')
+      .doc(itemId)
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          // Document data is available in doc.data()
+          const sellerData = doc.data();
+          // console.log('Seller Data:', sellerData.deviceToken);
+          // sellerFcmToken = sellerData.deviceToken;
+          setClickedSellerDeviceToken(sellerData.deviceToken);
+        } else {
+          console.log('No such document!');
+        }
+      })
+      .catch(error => {
+        console.error('Error getting seller document:', error);
+      });
+  }
 
   const renderItem = ({item}) => {
-    console.log(item.id);
     return item.id == 0 ? (
       <TouchableOpacity
         key={item.id}
@@ -139,93 +159,148 @@ const SellerScreen = () => {
             style={styles.iconOpacity}
           />
         </View>
-        <Text style={styles.text}>{item.data.name}</Text>
+        <Text style={[FONTS.body3, styles.text]}>{item.data.name}</Text>
       </TouchableOpacity>
     ) : (
       <TouchableOpacity
         key={item.id}
         style={styles.rootImgContainer}
         onPress={() => {
+          // setClickedSeller(item.id);
+          console.log('itemId---------->', item.id);
+          setDeviceToken(item.id);
+          console.log('itemId---------->', item.id);
           setModalVisible(true);
         }}>
         <View style={styles.imgContainer}>
           <Image style={styles.img} source={{uri: item.data.imageUrl}} />
         </View>
-        <Text style={[FONTS.h4, styles.text]}>{item.data.name}</Text>
+        <Text style={[FONTS.body3, styles.text]}>{item.data.name}</Text>
       </TouchableOpacity>
     );
   };
 
+  // const sellerFcmToken =
+  //   'emeV5Te3QWeotU0S4Vx_WR:APA91bEQdEaRk6oUpzE35aa9Zw_PmMwUp6QdPvKLgxMproXA3XcZy8BLLusL0FCHX8XjINivdt7-gaa5NActmUMmEltB4IH9qSDROdxgcU6ITf1_iDBrZV2XOzsU75lTFCdgWv2ylqfw'; // Replace with the actual seller's FCM token
+
+  // const message = {
+  //   to: sellerFcmToken,
+  //   notification: {
+  //     title: 'User App Notification',
+  //     body: 'This is a notification from the user app to the seller app.',
+  //   },
+  //   data: {
+  //     // You can include additional data if needed
+  //     // ...
+  //   },
+  // };
+
+  // async function handleCallNotification() {
+  //   console.log('<==========handleCallNotification==========>');
+  //   console.log('clickedSellerDeviceToken--->', clickedSellerDeviceToken);
+
+  //   const message = {
+  //     to: clickedSellerDeviceToken,
+  //     notification: {
+  //       title: '📲Fasto user Calling',
+  //       body: '📞📞Call from a fasto user📞📞',
+  //     },
+  //     data: {
+  //       // You can include additional data if needed
+  //       // ...
+  //     },
+  //   };
+  //   console.log(
+  //     'handleCallNotificationClickedSellerDeviceToken----------->',
+  //     clickedSellerDeviceToken,
+  //   );
+  //   await fetch('https://fcm.googleapis.com/fcm/send', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization:
+  //         'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
+  //     },
+  //     body: JSON.stringify(message),
+  //   });
+  // }
+
+  // Call the function to send the notification
   return (
     <SafeAreaView style={styles.rootContainer}>
-      <CommonHeader title={'dashboard'} />
-      <View style={styles.textInputContainer}>
-        <VectorIcon
-          name="search"
-          color={COLORS.darkBlue}
-          size={25}
-          style={styles.iconOpacity}
-        />
-        <TextInput style={styles.textInput} placeholder="Search..." />
+      <View style={styles.headerContainer}>
+        <CommonHeader title={'dashboard'} />
       </View>
-      <FlatList
-        contentContainerStyle={{
-          marginTop: 20,
-          alignItems: 'center',
-        }}
-        data={sellerData}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        numColumns={3}
-      />
-      <Modal
-        animationType="slide"
-        transparent={true}
-        style={styles.Modal}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                console.log('Calling action');
-                setModalVisible(false);
-              }}>
-              <VectorIcon
-                name={'call'}
-                type={'Ionicons'}
-                size={25}
-                color={COLORS.darkBlue}
-              />
-            </TouchableOpacity>
+      <View style={styles.mainContainer}>
+        <Text style={[FONTS.body2, styles.text2]}>
+          Hello user,{'\uD83D\uDC4B'}
+        </Text>
+        <Text style={[FONTS.body5, styles.text2, {paddingTop: '3%'}]}>
+          Choose your seller for the day!
+        </Text>
+        <FlatList
+          contentContainerStyle={{
+            marginTop: '10%',
+            alignItems: 'center',
+          }}
+          data={sellerData}
+          renderItem={renderItem}
+          keyExtractor={item => item.id.toString()}
+          numColumns={3}
+        />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          style={styles.Modal}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  console.log('Calling action');
+                  // handleCallNotification();
+                  navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
+                  setModalVisible(false);
+                }}>
+                <VectorIcon
+                  name={'call'}
+                  type={'Ionicons'}
+                  size={25}
+                  color={COLORS.white}
+                />
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                console.log('Messaging action');
-                setModalVisible(false);
-              }}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  console.log('Messaging action');
+                  setModalVisible(false);
+                }}>
+                <VectorIcon
+                  name={'android-messages'}
+                  type={'MaterialCommunityIcons'}
+                  size={25}
+                  color={COLORS.white}
+                />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.cross}>
               <VectorIcon
-                name={'android-messages'}
-                type={'MaterialCommunityIcons'}
-                size={25}
+                name={'cross'}
+                type={'Entypo'}
+                size={30}
+                style={styles.closeButton}
                 color={COLORS.darkBlue}
+                onPress={() => setModalVisible(false)}
               />
             </TouchableOpacity>
           </View>
-          <VectorIcon
-            name={'cross'}
-            type={'Entypo'}
-            size={30}
-            style={styles.closeButton}
-            color={COLORS.darkBlue}
-            onPress={() => setModalVisible(false)}
-          />
-        </View>
-      </Modal>
+        </Modal>
+      </View>
     </SafeAreaView>
   );
 };
@@ -235,34 +310,39 @@ export default SellerScreen;
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    // paddingVertical: 20,
+    // paddingHorizontal: 10,
+    backgroundColor: COLORS.secondaryBackground,
+    height: height,
+    width: width,
+  },
+  headerContainer: {
     backgroundColor: COLORS.white,
+    paddingHorizontal: 5,
+    paddingTop: 10,
   },
-  textInputContainer: {
-    marginTop: 20,
-    marginHorizontal: 10,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    width: '95%',
-    borderWidth: 1,
-    borderColor: COLORS.darkBlue,
-    borderRadius: 40,
-    alignItems: 'center',
+  mainContainer: {
+    backgroundColor: COLORS.white,
+    marginVertical: '3%',
+    marginHorizontal: '2%',
+    paddingVertical: '5%',
+    borderRadius: 10,
+    overflow: 'hidden',
   },
-  textInput: {
-    flex: 1,
-    height: 40,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    fontSize: 18,
+  text: {
+    marginTop: 5,
+    color: COLORS.darkBlue,
+    fontSize: 16,
   },
-  text: {marginTop: 5, color: COLORS.darkBlue, fontSize: 16},
+  text2: {
+    color: COLORS.darkBlue,
+    textAlign: 'center',
+  },
   img: {width: '100%', height: '100%'},
   iconOpacity: {opacity: 0.7},
   addIconContainer: {
-    width: 90,
-    height: 90,
+    width: 70,
+    height: 70,
     borderRadius: 45,
     overflow: 'hidden',
     borderColor: COLORS.darkBlue,
@@ -273,13 +353,13 @@ const styles = StyleSheet.create({
   },
   rootImgContainer: {
     marginTop: 5,
-    paddingHorizontal: '3.6%',
+    paddingHorizontal: '3.4%',
     paddingVertical: 10,
     alignItems: 'center',
   },
   imgContainer: {
-    width: 90,
-    height: 90,
+    width: 70,
+    height: 70,
     borderRadius: 45,
     overflow: 'hidden',
     elevation: 5, // This property is for Android
@@ -290,7 +370,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.secondaryBackground,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingVertical: 80,
@@ -299,10 +379,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   button: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.darkBlue,
     borderWidth: 1.5,
-    borderColor: COLORS.darkBlue,
-    borderRadius: 30,
+    borderColor: COLORS.white,
+    borderRadius: 15,
     paddingVertical: 10,
     paddingHorizontal: 30,
     elevation: 3.5,
@@ -311,9 +391,40 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
   },
-  closeButton: {
+  cross: {
     position: 'absolute',
-    bottom: 170,
-    right: 5,
+    bottom: '21%',
+    right: 0,
+    padding: '2%',
   },
+  // textInputContainer: {
+  //   marginTop: 20,
+  //   marginHorizontal: 10,
+  //   paddingHorizontal: 10,
+  //   flexDirection: 'row',
+  //   width: '95%',
+  //   borderWidth: 1,
+  //   borderColor: COLORS.darkBlue,
+  //   borderRadius: 40,
+  //   alignItems: 'center',
+  // },
+  // textInput: {
+  //   flex: 1,
+  //   height: 40,
+  //   paddingVertical: 5,
+  //   paddingHorizontal: 10,
+  //   fontSize: 18,
+  // },
 });
+
+{
+  /* <View style={styles.textInputContainer}>
+        <VectorIcon
+          name="search"
+          color={COLORS.darkBlue}
+          size={25}
+          style={styles.iconOpacity}
+        />
+        <TextInput style={styles.textInput} placeholder="Search..." />
+      </View> */
+}

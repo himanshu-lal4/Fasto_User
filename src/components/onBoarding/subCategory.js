@@ -36,7 +36,6 @@ const SubcategoryScreen = ({route}) => {
       Alert.alert('Attention', 'Please select at least one subcategory.');
     } else {
       navigation.navigate('ChooseImgScreen');
-      console.log('Selected Subcategories:', selectedSubcategories);
       // Do whatever you need with the selected subcategories here
     }
   };

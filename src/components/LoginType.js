@@ -1,4 +1,11 @@
-import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import styles from '../assets/theme/style';
 import {Card} from 'react-native-paper';
@@ -15,6 +22,7 @@ import {AccessToken, LoginManager} from 'react-native-fbsdk-next';
 import {useDispatch} from 'react-redux';
 import {addUID} from '../redux/userTokenSlice';
 import firestore from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
 const LoginType = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -29,35 +37,55 @@ const LoginType = () => {
 
   //google Sign In
   const googleSignInHandle = async () => {
+    await messaging().registerDeviceForRemoteMessages();
+
+    // Get the token
+    const token = await messaging().getToken();
     try {
       await GoogleSignin.hasPlayServices();
       const {idToken} = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const {user} = await auth().signInWithCredential(googleCredential);
-      firestore()
-        .collection('user')
-        .doc(user.uid)
-        .set({
-          name: user.displayName,
-          email: user.email,
-          photoUrl: user.photoURL,
-          seller: [
-            {
-              id: '0',
-              data: {
-                email: 'deafult@gmail.com',
-                imageUrl: 'https://picsum.photos/id/1/5000/3333',
-                name: 'Add',
-              },
-            },
-          ],
-        })
-        .then(() => {
-          console.log('User added!');
-        });
-      if (user.uid) {
-        dispatch(addUID(user.uid));
-      }
+
+      const userDocRef = firestore().collection('Users').doc(user.uid);
+
+      // Check if the user document already exists
+      userDocRef.get().then(docSnapshot => {
+        if (docSnapshot.exists) {
+          // User already exists, you can handle this case accordingly
+          dispatch(addUID(user.uid));
+          console.log('googleUID------->', user.uid);
+          navigation.navigate('SellerScreen');
+          console.log('User already exists!');
+        } else {
+          firestore()
+            .collection('Users')
+            .doc(user.uid)
+            .set({
+              name: user.displayName,
+              email: user.email,
+              photoUrl: user.photoURL,
+              deviceToken: token,
+              OS: Platform.OS,
+              seller: [
+                {
+                  id: '0',
+                  data: {
+                    email: 'deafult@gmail.com',
+                    imageUrl: 'https://picsum.photos/id/1/5000/3333',
+                    name: 'Add',
+                  },
+                },
+              ],
+            })
+            .then(() => {
+              dispatch(addUID(user.uid));
+              console.log('googleUID------->', user.uid);
+              navigation.navigate('SellerScreen');
+              console.log('User added!');
+            });
+        }
+      });
 
       return;
 
