@@ -25,6 +25,7 @@ import {Dimensions} from 'react-native';
 const {width, height} = Dimensions.get('window');
 
 const SellerScreen = () => {
+  console.log('<-------------SellerScreen Rendered--------------->');
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [clickedSeller, setClickedSeller] = useState(null);
@@ -60,15 +61,19 @@ const SellerScreen = () => {
   const [sellerData, setSellerData] = useState([]);
   const userToken = useSelector(state => state.userId.UID);
   const currUserToken = useSelector(state => state.userToken.UID);
+  console.log('🚀 ~ SellerScreen ~ currUserToken:', currUserToken);
 
   const addNewSeller = async () => {
     try {
-      const doc = await firestore().collection('Sellers').doc(userToken).get();
+      const doc = await firestore()
+        .collection('Sellers')
+        .doc(currUserToken)
+        .get();
 
       if (doc.exists) {
         const userData = doc.data();
         const obj = {
-          id: userToken,
+          id: currUserToken,
           data: {
             name: userData.name,
             imageUrl: userData.photoUrl,
@@ -123,7 +128,7 @@ const SellerScreen = () => {
     };
 
     fetchData();
-  }, [userToken]);
+  }, [currUserToken]);
   async function setDeviceToken(itemId) {
     await firestore()
       .collection('Sellers')
