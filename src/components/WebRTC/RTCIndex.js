@@ -168,6 +168,14 @@ const RTCIndex = ({route, navigation}) => {
 
     await channelDoc.set({offer: offer});
 
+    const unsubscribe = channelDoc.onSnapshot(snapshot => {
+      const data = snapshot.data();
+      if (data && data.receiver === false) {
+        navigation.goBack(); 
+        unsubscribe(); 
+      }
+    });
+
     channelDoc.onSnapshot(snapshot => {
       const data = snapshot.data();
       if (!pc.current.currentRemoteDescription && data?.answer) {
@@ -183,6 +191,10 @@ const RTCIndex = ({route, navigation}) => {
           pc.current.addIceCandidate(new RTCIceCandidate(data));
         }
       });
+    });
+    await channelDoc.update({
+      sender: true,
+      receiver: true,
     });
     await handleCallNotification(channelDoc.id);
   };
@@ -221,7 +233,7 @@ const RTCIndex = ({route, navigation}) => {
       });
     });
   };
-  const endCall = () => {
+  const endCall = async () => {
     // Close the peer connection and reset states
     if (pc.current) {
       pc.current.close();
@@ -231,6 +243,13 @@ const RTCIndex = ({route, navigation}) => {
     setChannelId(null);
     setWebcamStarted(false);
     navigation.goBack();
+
+    if (channelId) {
+      const channelDoc = firestore().collection('channels').doc(channelId);
+      await channelDoc.update({
+        receiver: false,
+      });
+    }
   };
 
   useEffect(() => {
