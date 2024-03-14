@@ -66,6 +66,24 @@ const RTCIndex = ({route, navigation}) => {
 
       pc.current = new RTCPeerConnection(servers); // Ensure pc.current is properly initialized
 
+      pc.current.onconnectionstatechange = event => {
+        console.log('Connection state changed:', pc.current.connectionState);
+        if (pc.current.connectionState === 'disconnected') {
+          // Peer connection closed
+          console.log('Peer connection disconnected.');
+          // navigation.goBack();
+          navigation.navigate('SellerScreen');
+        } else if (pc.current.connectionState === 'closed') {
+          console.log('Peer connection closed.');
+          navigation.navigate('SellerScreen');
+        }
+      };
+
+      // Add event listener for errors
+      pc.current.onerror = error => {
+        console.error('An error occurred:', error);
+      };
+
       pc.current.ontrack = event => {
         console.log('Received remote tracks:', event.track);
         event.streams.forEach(stream => {
@@ -168,13 +186,13 @@ const RTCIndex = ({route, navigation}) => {
 
     await channelDoc.set({offer: offer});
 
-    const unsubscribe = channelDoc.onSnapshot(snapshot => {
-      const data = snapshot.data();
-      if (data && data.seller === false) {
-        endCall();
-        unsubscribe();
-      }
-    });
+    // const unsubscribe = channelDoc.onSnapshot(snapshot => {
+    //   const data = snapshot.data();
+    //   if (data && data.seller === false) {
+    //     endCall();
+    //     unsubscribe();
+    //   }
+    // });
 
     channelDoc.onSnapshot(snapshot => {
       const data = snapshot.data();
@@ -192,10 +210,10 @@ const RTCIndex = ({route, navigation}) => {
         }
       });
     });
-    await channelDoc.update({
-      user: true,
-      seller: true,
-    });
+    // await channelDoc.update({
+    //   user: true,
+    //   seller: true,
+    // });
     await handleCallNotification(channelDoc.id);
   };
 
@@ -243,14 +261,14 @@ const RTCIndex = ({route, navigation}) => {
     setRemoteStream(null);
     setChannelId(null);
     setWebcamStarted(false);
-    navigation.goBack();
+    // navigation.goBack();
 
-    if (channelId) {
-      const channelDoc = firestore().collection('channels').doc(channelId);
-      await channelDoc.update({
-        user: false,
-      });
-    }
+    // if (channelId) {
+    //   const channelDoc = firestore().collection('channels').doc(channelId);
+    //   await channelDoc.update({
+    //     user: false,
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -276,6 +294,40 @@ const RTCIndex = ({route, navigation}) => {
 
     return () => backHandler.remove(); // Remove the event listener on component unmount
   }, []);
+
+  // Inside the RTCIndex component
+  // useEffect(() => {
+  //   startWebcam();
+
+  //   // Initialize RTCPeerConnection and add event listeners
+  //   pc.current = new RTCPeerConnection(servers);
+
+  //   // Add event listener for connection state changes
+  //   pc.current.onconnectionstatechange = event => {
+  //     console.log('Connection state changed:', pc.current.connectionState);
+  //     if (pc.current.connectionState === 'closed') {
+  //       // Peer connection closed
+  //       console.log('Peer connection closed.');
+  //       // Perform any additional actions if needed
+  //     }
+  //   };
+
+  //   // Add event listener for errors
+  //   pc.current.onerror = error => {
+  //     console.error('An error occurred:', error);
+  //     // Handle error appropriately
+  //   };
+
+  //   // Cleanup function: remove event listeners on component unmount
+  //   return () => {
+  //     if (pc.current) {
+  //       pc.current.onconnectionstatechange = null;
+  //       pc.current.onerror = null;
+  //     }
+  //   };
+  // }, []); // Empty dependency array ensures this effect runs only once, like componentDidMount
+
+  // Add event listeners for connection state changes
 
   return (
     <KeyboardAvoidingView style={styles.body} behavior="position">
