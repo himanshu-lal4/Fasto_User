@@ -262,7 +262,6 @@ const RTCIndex = ({route, navigation}) => {
     setRemoteStream(null);
     setChannelId(null);
     setWebcamStarted(false);
-    crashlytics().crash();
     // navigation.goBack();
 
     // if (channelId) {
