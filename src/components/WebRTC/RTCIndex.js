@@ -24,6 +24,7 @@ import {Dimensions} from 'react-native';
 import {COLORS} from '../../assets/theme';
 import VectorIcon from '../../utils/VectorIcon';
 import {useSelector} from 'react-redux';
+import crashlytics from '@react-native-firebase/crashlytics';
 const {width, height} = Dimensions.get('window');
 const RTCIndex = ({route, navigation}) => {
   const userUID = useSelector(state => state.userToken.UID);
@@ -261,6 +262,7 @@ const RTCIndex = ({route, navigation}) => {
     setRemoteStream(null);
     setChannelId(null);
     setWebcamStarted(false);
+    crashlytics().crash();
     // navigation.goBack();
 
     // if (channelId) {
