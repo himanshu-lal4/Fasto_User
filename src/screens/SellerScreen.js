@@ -64,16 +64,15 @@ const SellerScreen = () => {
   console.log('🚀 ~ SellerScreen ~ currUserToken:', currUserToken);
 
   const addNewSeller = async () => {
+    console.log('reached');
     try {
-      const doc = await firestore()
-        .collection('Sellers')
-        .doc(currUserToken)
-        .get();
+      console.log(userToken);
+      const doc = await firestore().collection('Sellers').doc(userToken).get();
 
       if (doc.exists) {
         const userData = doc.data();
         const obj = {
-          id: currUserToken,
+          id: userToken,
           data: {
             name: userData.name,
             imageUrl: userData.photoUrl,
@@ -128,7 +127,7 @@ const SellerScreen = () => {
     };
 
     fetchData();
-  }, [currUserToken]);
+  }, [userToken]);
   async function setDeviceToken(itemId) {
     await firestore()
       .collection('Sellers')
@@ -142,7 +141,7 @@ const SellerScreen = () => {
           // sellerFcmToken = sellerData.deviceToken;
           setClickedSellerDeviceToken(sellerData.deviceToken);
         } else {
-          console.log('No such document!');
+          console.log('No such document 147!');
         }
       })
       .catch(error => {
