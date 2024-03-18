@@ -21,6 +21,7 @@ import database from '@react-native-firebase/database';
 import {useSelector} from 'react-redux';
 import muteMicrophoneImage from '../../assets/images/mute-microphone.png';
 import microphoneImage from '../../assets/images/microphone.png';
+import InCallManager from 'react-native-incall-manager';
 const configuration = {
   iceServers: [
     {
@@ -32,6 +33,7 @@ const configuration = {
 
 export default function CallScreen({setScreen, screens, roomId, navigation}) {
   const [startWebCamState, setStartWebCamState] = useState();
+  const [speakerOn, setSpeakerOn] = useState(false);
   const [startCallState, setStartCallState] = useState();
   const userUID = useSelector(state => state.userToken.UID);
   async function onBackPress(id) {
@@ -203,8 +205,19 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
   const switchCamera = () => {
     localStream.getVideoTracks().forEach(track => track._switchCamera());
   };
+  InCallManager.start();
   const toggleSpeaker = () => {
-    console.log('toggleSpeaker');
+    const newMode = !speakerOn;
+    setSpeakerOn(newMode);
+
+    // Set the speaker mode
+    if (newMode) {
+      InCallManager.setForceSpeakerphoneOn(true);
+      console.log('inside toggleSpeaker if', newMode);
+    } else {
+      InCallManager.setForceSpeakerphoneOn(false);
+      console.log('inside toggleSpeaker else', newMode);
+    }
   };
   const toggleMute = () => {
     if (!remoteStream) {
