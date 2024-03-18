@@ -6,6 +6,7 @@ import {
   View,
   TouchableOpacity,
   Image,
+  BackHandler,
 } from 'react-native';
 
 import {
@@ -21,6 +22,8 @@ import database from '@react-native-firebase/database';
 import {useSelector} from 'react-redux';
 import muteMicrophoneImage from '../../assets/images/mute-microphone.png';
 import microphoneImage from '../../assets/images/microphone.png';
+import speakerOnImg from '../../assets/images/speaker.png';
+import speakerOfImg from '../../assets/images/speaker-filled-audio-tool.png';
 import InCallManager from 'react-native-incall-manager';
 const configuration = {
   iceServers: [
@@ -64,6 +67,26 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
   const [cachedLocalPC, setCachedLocalPC] = useState();
   const [channelId, setChannelId] = useState();
   const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    const backAction = () => {
+      // dispatch(addChannelId(null));
+      // onBackPress(channelId);
+      console.log('Back button pressed');
+
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove(); // Remove the event listener on component unmount
+
+    // The empty dependency array ensures that this effect runs once
+    // Similar to componentDidMount in class components
+  }, []);
 
   const startLocalStream = async () => {
     const isFront = true;
@@ -275,8 +298,8 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
 
           <TouchableOpacity onPress={toggleSpeaker}>
             <Image
-              style={{width: 50, height: 50}}
-              source={require('../../assets/images/speaker.png')}
+              style={{width: 40, height: 40, marginTop: 4}}
+              source={speakerOn ? speakerOfImg : speakerOnImg}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={switchCamera}>
