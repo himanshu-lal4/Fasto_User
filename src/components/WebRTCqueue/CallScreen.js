@@ -6,6 +6,7 @@ import {
   View,
   TouchableOpacity,
   Image,
+  BackHandler,
 } from 'react-native';
 
 import {
@@ -22,6 +23,8 @@ import {useSelector} from 'react-redux';
 import muteMicrophoneImage from '../../assets/images/mute-microphone.png';
 import microphoneImage from '../../assets/images/microphone.png';
 import InCallManager from 'react-native-incall-manager';
+import speakerOnImg from '../../assets/images/speaker.png';
+import speakerOfImg from '../../assets/images/speaker-filled-audio-tool.png';
 const configuration = {
   iceServers: [
     {
@@ -35,6 +38,12 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
   const [startWebCamState, setStartWebCamState] = useState();
   const [speakerOn, setSpeakerOn] = useState(false);
   const [startCallState, setStartCallState] = useState();
+  const [localStream, setLocalStream] = useState();
+  const [remoteStream, setRemoteStream] = useState();
+  const [cachedLocalPC, setCachedLocalPC] = useState();
+  const [channelId, setChannelId] = useState();
+  const [isMuted, setIsMuted] = useState(false);
+
   const userUID = useSelector(state => state.userToken.UID);
   async function onBackPress(id) {
     if (cachedLocalPC) {
@@ -56,14 +65,25 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
     } catch (error) {
       console.error('Error updating data:', error);
     }
+    InCallManager.stop();
     navigation.navigate('SellerScreen');
   }
 
-  const [localStream, setLocalStream] = useState();
-  const [remoteStream, setRemoteStream] = useState();
-  const [cachedLocalPC, setCachedLocalPC] = useState();
-  const [channelId, setChannelId] = useState();
-  const [isMuted, setIsMuted] = useState(false);
+  useEffect(() => {
+    const backAction = async () => {
+      console.log(
+        'Back button pressed ------------------ >>>>>>>>>>>>>>>>>>>>>>>',
+      );
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove(); // Remove the event listener on component unmount
+  }, []);
 
   const startLocalStream = async () => {
     const isFront = true;
@@ -212,10 +232,12 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
 
     // Set the speaker mode
     if (newMode) {
-      InCallManager.setForceSpeakerphoneOn(true);
+      // InCallManager.setForceSpeakerphoneOn(true);
+      InCallManager.setSpeakerphoneOn(true);
       console.log('inside toggleSpeaker if', newMode);
     } else {
-      InCallManager.setForceSpeakerphoneOn(false);
+      // InCallManager.setForceSpeakerphoneOn(false);
+      InCallManager.setSpeakerphoneOn(false);
       console.log('inside toggleSpeaker else', newMode);
     }
   };
@@ -275,8 +297,8 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
 
           <TouchableOpacity onPress={toggleSpeaker}>
             <Image
-              style={{width: 50, height: 50}}
-              source={require('../../assets/images/speaker.png')}
+              style={{width: 40, height: 40, marginTop: 4}}
+              source={speakerOn ? speakerOfImg : speakerOnImg}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={switchCamera}>
