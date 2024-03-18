@@ -1,5 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import {Text, StyleSheet, Button, View} from 'react-native';
+import {
+  Text,
+  StyleSheet,
+  Button,
+  View,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 
 import {
   RTCPeerConnection,
@@ -12,7 +19,8 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import database from '@react-native-firebase/database';
 import {useSelector} from 'react-redux';
-
+import muteMicrophoneImage from '../../assets/images/mute-microphone.png';
+import microphoneImage from '../../assets/images/microphone.png';
 const configuration = {
   iceServers: [
     {
@@ -241,10 +249,16 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
 
       <View style={styles.callButtons}>
         <View styles={styles.buttonContainer}>
-          <Button
+          <TouchableOpacity onPress={() => onBackPress(channelId)}>
+            <Image
+              style={{width: 50, height: 50}}
+              source={require('../../assets/images/delete-button.png')}
+            />
+          </TouchableOpacity>
+          {/* <Button
             title="Click to stop call"
             onPress={() => onBackPress(channelId)}
-          />
+          /> */}
         </View>
         <View styles={styles.buttonContainer}>
           {!localStream && (
@@ -262,12 +276,24 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
 
       {localStream && (
         <View style={styles.toggleButtons}>
-          <Button title="Switch camera" onPress={switchCamera} />
-          <Button
+          <TouchableOpacity onPress={switchCamera}>
+            <Image
+              style={{width: 50, height: 50}}
+              source={require('../../assets/images/switch-camera.png')}
+            />
+          </TouchableOpacity>
+          {/* <Button title="Switch camera" onPress={switchCamera} /> */}
+          <TouchableOpacity onPress={toggleMute}>
+            <Image
+              style={{width: 50, height: 50}}
+              source={isMuted ? muteMicrophoneImage : microphoneImage}
+            />
+          </TouchableOpacity>
+          {/* <Button
             title={`${isMuted ? 'Unmute' : 'Mute'} stream`}
             onPress={toggleMute}
             disabled={!remoteStream}
-          />
+          /> */}
         </View>
       )}
 
