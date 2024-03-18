@@ -31,6 +31,8 @@ const configuration = {
 };
 
 export default function CallScreen({setScreen, screens, roomId, navigation}) {
+  const [startWebCamState, setStartWebCamState] = useState();
+  const [startCallState, setStartCallState] = useState();
   const userUID = useSelector(state => state.userToken.UID);
   async function onBackPress(id) {
     if (cachedLocalPC) {
@@ -84,20 +86,9 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
     };
     const newStream = await mediaDevices.getUserMedia(constraints);
     setLocalStream(newStream);
+    setStartWebCamState(true);
   };
   async function handleCallNotification(id) {
-    // const message = {
-    //   to: clickedSellerDeviceToken,
-    //   notification: {
-    //     title: '📲Fasto user Calling',
-    //     body: '📞📞Call from a fasto user📞📞',
-    //   },
-    //   data: {
-    //     // You can include additional data if needed
-    //     // ...
-    //     channelId: channelId,
-    //   },
-    // };
     console.log('clickedSellerDeviceToken', id);
     const message = {
       to: roomId,
@@ -108,7 +99,6 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
       data: {
         channelId: `${id}`,
         userUID: userUID,
-        // Add more key-value pairs as needed
       },
     };
 
@@ -117,7 +107,7 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
       headers: {
         'Content-Type': 'application/json',
         Authorization:
-          'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
+          'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F',
       },
       body: JSON.stringify(message),
     });
@@ -125,17 +115,14 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
     try {
       console.log('inside endCall try');
       const roomRef = database().ref(`/Sellers/${id}`);
-      // Check if the room already exists
       roomRef.once('value', async snapshot => {
         if (snapshot.exists()) {
-          // If room exists, update its data
           await roomRef.update({
             userCallStatus: 'truing',
             sellerCallStatus: 'something',
           });
           console.log('Data updated------------>', id);
         } else {
-          // If room doesn't exist, set its data
           await roomRef.set({
             userCallStatus: 'setting tr',
             sellerCallStatus: 'settin some',
@@ -150,7 +137,6 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
   }
   const startCall = async id => {
     const localPC = new RTCPeerConnection(configuration);
-    // localPC.addStream(localStream);
     localStream.getTracks().forEach(track => {
       localPC.addTrack(track, localStream);
     });
@@ -164,9 +150,7 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
     const unsubscribe = database()
       .ref(`/Sellers/${roomRef.id}`)
       .on('value', snapshot => {
-        // This callback will be invoked whenever the data at the specified reference changes
         const data = snapshot?.val();
-        // You can access and handle the updated data here
         if (data?.sellerCallStatus === false) {
           onBackPress(roomRef.id);
         }
@@ -192,16 +176,6 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
 
     const roomWithOffer = {offer};
     await roomRef.set(roomWithOffer);
-
-    // roomRef.onSnapshot(async snapshot => {
-    //   const data = snapshot.data();
-    //   if (!localPC.currentRemoteDescription && data?.answer) {
-    //     const answerDescription = new RTCSessionDescription(data.answer);
-    //     console.log('🚀 ~ startCall ~ answerDescription:', answerDescription);
-
-    //     await localPC.setRemoteDescription(answerDescription);
-    //   }
-    // });
 
     roomRef.onSnapshot(async snapshot => {
       const data = snapshot.data();
@@ -230,18 +204,26 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
     localStream.getVideoTracks().forEach(track => track._switchCamera());
   };
 
-  // Mutes the local's outgoing audio
   const toggleMute = () => {
     if (!remoteStream) {
       return;
     }
     localStream.getAudioTracks().forEach(track => {
-      // console.log(track.enabled ? 'muting' : 'unmuting', ' local track', track);
       track.enabled = !track.enabled;
       setIsMuted(!track.enabled);
     });
   };
+  useEffect(() => {
+    // Call function 1
+    startLocalStream();
+  }, []); // Empty dependency array ensures this runs only once after mount
 
+  useEffect(() => {
+    // Check if state1 is updated, then call function 2
+    if (startWebCamState === true) {
+      startCall();
+    }
+  }, [startWebCamState]);
   return (
     <>
       {/* <Text style={styles.heading}>Call Screen</Text> */}
