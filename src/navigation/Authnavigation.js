@@ -19,6 +19,7 @@ import {StartCall} from '../components/WebRTC/StartCall';
 import WebRTC from '../components/WebRTC/WebRTC';
 import RTCIndex from '../components/WebRTC/RTCIndex';
 import LoadingScreen from '../components/Common/LodingScreen';
+import WebRTCIndex from '../components/WebRTCqueue/WebRTCIndex';
 
 const Stack = createStackNavigator();
 
@@ -56,13 +57,16 @@ const Authnavigation = () => {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-        }}>
+        }}
+        // initialRouteName="WebRTCIndex"
+      >
         {user ? (
           <>
             <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
             <Stack.Screen name="SellerScreen" component={SellerScreen} />
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
+            <Stack.Screen name="WebRTCIndex" component={WebRTCIndex} />
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
           </>
         ) : (

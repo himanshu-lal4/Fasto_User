@@ -21,11 +21,13 @@ import CommonHeader from '../components/Common/CommonHeader';
 import {PermissionsAndroid} from 'react-native';
 import StartWebCam from '../components/WebRTC/StartWebCam';
 import {StartCall, startCall} from '../components/WebRTC/StartCall';
+import database from '@react-native-firebase/database';
 import {Dimensions} from 'react-native';
 const {width, height} = Dimensions.get('window');
 
 const SellerScreen = () => {
   console.log('<-------------SellerScreen Rendered--------------->');
+  const userUID = useSelector(state => state.userToken.UID);
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [clickedSeller, setClickedSeller] = useState(null);
@@ -228,7 +230,67 @@ const SellerScreen = () => {
   //     body: JSON.stringify(message),
   //   });
   // }
-
+  async function handleCallNotification() {
+    // const message = {
+    //   to: clickedSellerDeviceToken,
+    //   notification: {
+    //     title: '📲Fasto user Calling',
+    //     body: '📞📞Call from a fasto user📞📞',
+    //   },
+    //   data: {
+    //     // You can include additional data if needed
+    //     // ...
+    //     channelId: channelId,
+    //   },
+    // };
+    // console.log('clickedSellerDeviceToken', clickedSellerDeviceToken);
+    // const message = {
+    //   to: clickedSellerDeviceToken,
+    //   notification: {
+    //     title: '📲Fasto user Calling',
+    //     body: '📞📞Call from a fasto user📞📞',
+    //   },
+    //   data: {
+    //     channelId: `${clickedSellerDeviceToken}`,
+    //     userUID: userUID,
+    //     // Add more key-value pairs as needed
+    //   },
+    // };
+    // await fetch('https://fcm.googleapis.com/fcm/send', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization:
+    //       'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
+    //   },
+    //   body: JSON.stringify(message),
+    // });
+    // try {
+    //   console.log('inside endCall try');
+    //   const roomRef = database().ref(`/Sellers/${clickedSellerDeviceToken}`);
+    //   // Check if the room already exists
+    //   roomRef.once('value', async snapshot => {
+    //     if (snapshot.exists()) {
+    //       // If room exists, update its data
+    //       await roomRef.update({
+    //         userCallStatus: 'truing',
+    //         sellerCallStatus: 'something',
+    //       });
+    //       console.log('Data updated------------>', clickedSellerDeviceToken);
+    //     } else {
+    //       // If room doesn't exist, set its data
+    //       await roomRef.set({
+    //         userCallStatus: 'setting tr',
+    //         sellerCallStatus: 'settin some',
+    //       });
+    //       console.log('Data set------------>', clickedSellerDeviceToken);
+    //     }
+    //   });
+    //   console.log('after endCall try');
+    // } catch (error) {
+    //   console.error('Error updating data:', error);
+    // }
+  }
   // Call the function to send the notification
   return (
     <SafeAreaView style={styles.rootContainer}>
@@ -264,10 +326,15 @@ const SellerScreen = () => {
             <View style={styles.modalContent}>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => {
+                onPress={async () => {
                   console.log('Calling action');
                   // handleCallNotification();
-                  navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
+                  // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
+                  handleCallNotification();
+                  navigation.navigate('WebRTCIndex', {
+                    clickedSellerDeviceToken,
+                  });
+                  // navigation.navigate('WebRTCIndex');
                   setModalVisible(false);
                 }}>
                 <VectorIcon
