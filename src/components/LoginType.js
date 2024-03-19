@@ -23,6 +23,7 @@ import {useDispatch} from 'react-redux';
 import {addUID} from '../redux/userTokenSlice';
 import firestore from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
+import {addSeller} from '../redux/userDataSlice';
 const LoginType = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();

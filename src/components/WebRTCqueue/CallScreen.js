@@ -51,6 +51,11 @@ export default function CallScreen({
   const [isMuted, setIsMuted] = useState(false);
 
   const userUID = useSelector(state => state.userToken.UID);
+  const userData = useSelector(state => state.userData.user);
+  console.log(
+    '🚀 ~<=======++++=====++++====+++++==== sellerData:=======++++=====++++====+++++====>',
+    userData,
+  );
   async function onBackPress(id) {
     if (cachedLocalPC) {
       localStream.getTracks().forEach(track => {
@@ -292,6 +297,7 @@ export default function CallScreen({
         // Add new field or update existing fields
         active_call: null,
         created_at: firestore.FieldValue.serverTimestamp(),
+        userData: userData,
       },
       {merge: true},
     );
