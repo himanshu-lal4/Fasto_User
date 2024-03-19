@@ -34,7 +34,13 @@ const configuration = {
   iceCandidatePoolSize: 10,
 };
 
-export default function CallScreen({setScreen, screens, roomId, navigation}) {
+export default function CallScreen({
+  setScreen,
+  screens,
+  roomId,
+  navigation,
+  sellerId,
+}) {
   const [startWebCamState, setStartWebCamState] = useState();
   const [speakerOn, setSpeakerOn] = useState(false);
   const [startCallState, setStartCallState] = useState();
@@ -165,8 +171,23 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
     localPC.onerror = error => {
       console.error('An error occurred:', error);
     };
+    console.log('seller Id in call screen -----------------', sellerId);
+    const roomRef = firestore()
+      .collection('videoRoom')
+      .doc(sellerId)
+      .collection('rooms')
+      .doc();
+    const currCallDataRef = roomRef.collection('currCallData').doc(sellerId);
 
-    const roomRef = await firestore().collection('rooms').doc();
+    // Set the data for the specific document within the currCallData collection
+    await currCallDataRef.set(
+      {
+        // Add new field or update existing fields
+        active_call: null,
+        created_at: firestore.FieldValue.serverTimestamp(),
+      },
+      {merge: true},
+    );
     setChannelId(roomRef.id);
     handleCallNotification(roomRef.id);
     const unsubscribe = database()

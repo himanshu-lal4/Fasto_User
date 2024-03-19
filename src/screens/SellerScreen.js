@@ -30,9 +30,10 @@ const SellerScreen = () => {
   const userUID = useSelector(state => state.userToken.UID);
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [clickedSeller, setClickedSeller] = useState(null);
+  const [clickedSellerID, setClickedSellerID] = useState(null);
   const [clickedSellerDeviceToken, setClickedSellerDeviceToken] =
     useState(null);
+  const [sellerId, setSellerId] = useState(null);
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -175,6 +176,8 @@ const SellerScreen = () => {
           // setClickedSeller(item.id);
           console.log('itemId---------->', item.id);
           setDeviceToken(item.id);
+          setSellerId(item.id);
+          console.log('seller is ------------------------->', item);
           console.log('itemId---------->', item.id);
           setModalVisible(true);
         }}>
@@ -333,6 +336,7 @@ const SellerScreen = () => {
                   handleCallNotification();
                   navigation.navigate('WebRTCIndex', {
                     clickedSellerDeviceToken,
+                    sellerId,
                   });
                   // navigation.navigate('WebRTCIndex');
                   setModalVisible(false);

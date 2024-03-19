@@ -11,6 +11,7 @@ import JoinScreen from './JoinScreen';
 
 export default function WebRTCIndex({route, navigation}) {
   const {clickedSellerDeviceToken} = route.params;
+  const {sellerId} = route.params;
   const screens = {
     ROOM: 'JOIN_ROOM',
     CALL: 'CALL',
@@ -41,6 +42,7 @@ export default function WebRTCIndex({route, navigation}) {
           screens={screens}
           setScreen={setScreen}
           navigation={navigation}
+          sellerId={sellerId}
         />
       );
       break;
