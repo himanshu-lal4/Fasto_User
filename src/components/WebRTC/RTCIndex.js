@@ -24,16 +24,13 @@ import {Dimensions} from 'react-native';
 import {COLORS} from '../../assets/theme';
 import VectorIcon from '../../utils/VectorIcon';
 import {useSelector} from 'react-redux';
+import crashlytics from '@react-native-firebase/crashlytics';
+import database from '@react-native-firebase/database';
 const {width, height} = Dimensions.get('window');
 const RTCIndex = ({route, navigation}) => {
   const userUID = useSelector(state => state.userToken.UID);
-  console.log('🚀 ~ RTCIndex ~ userUID:', userUID);
 
   const {clickedSellerDeviceToken} = route.params;
-  console.log(
-    '🚀 ~ RTCIndex ~ clickedSellerDeviceToken:',
-    clickedSellerDeviceToken,
-  );
 
   const [remoteStream, setRemoteStream] = useState(null);
 
@@ -66,10 +63,26 @@ const RTCIndex = ({route, navigation}) => {
 
       pc.current = new RTCPeerConnection(servers); // Ensure pc.current is properly initialized
 
+      pc.current.onconnectionstatechange = event => {
+        console.log('Connection state changed:', pc.current.connectionState);
+        if (pc.current.connectionState === 'disconnected') {
+          // Peer connection closed
+          console.log('Peer connection disconnected.');
+          // navigation.goBack();
+          navigation.navigate('SellerScreen');
+        } else if (pc.current.connectionState === 'closed') {
+          console.log('Peer connection closed.');
+          navigation.navigate('SellerScreen');
+        }
+      };
+
+      // Add event listener for errors
+      pc.current.onerror = error => {
+        console.error('An error occurred:', error);
+      };
+
       pc.current.ontrack = event => {
-        console.log('Received remote tracks:', event.track);
         event.streams.forEach(stream => {
-          console.log('Received remote stream:', stream);
           setRemoteStream(stream);
         });
       };
@@ -104,9 +117,6 @@ const RTCIndex = ({route, navigation}) => {
   //     });
   // }
   async function handleCallNotification(channelId) {
-    console.log('<==========handleCallNotification==========>');
-    console.log('clickedSellerDeviceToken--->', clickedSellerDeviceToken);
-    console.log('channelId---->', channelId);
     // const message = {
     //   to: clickedSellerDeviceToken,
     //   notification: {
@@ -119,6 +129,7 @@ const RTCIndex = ({route, navigation}) => {
     //     channelId: channelId,
     //   },
     // };
+    console.log('clickedSellerDeviceToken', clickedSellerDeviceToken);
     const message = {
       to: clickedSellerDeviceToken,
       notification: {
@@ -132,10 +143,6 @@ const RTCIndex = ({route, navigation}) => {
       },
     };
 
-    console.log(
-      'handleCallNotificationClickedSellerDeviceToken----------->',
-      clickedSellerDeviceToken,
-    );
     await fetch('https://fcm.googleapis.com/fcm/send', {
       method: 'POST',
       headers: {
@@ -145,10 +152,19 @@ const RTCIndex = ({route, navigation}) => {
       },
       body: JSON.stringify(message),
     });
+    await database()
+      .ref(`/Sellers/${channelId}`)
+      .set({
+        callStatus: true,
+      })
+      .then(() => console.log('Data set------------>', channelId));
   }
 
   useEffect(() => {
-    startWebcam();
+    async function StartWebCamAwait() {
+      await startWebcam();
+    }
+    StartWebCamAwait();
   }, []);
   const startCall = async () => {
     const channelDoc = firestore().collection('channels').doc();
@@ -168,6 +184,14 @@ const RTCIndex = ({route, navigation}) => {
 
     await channelDoc.set({offer: offer});
 
+    // const unsubscribe = channelDoc.onSnapshot(snapshot => {
+    //   const data = snapshot.data();
+    //   if (data && data.seller === false) {
+    //     endCall();
+    //     unsubscribe();
+    //   }
+    // });
+
     channelDoc.onSnapshot(snapshot => {
       const data = snapshot.data();
       if (!pc.current.currentRemoteDescription && data?.answer) {
@@ -184,6 +208,10 @@ const RTCIndex = ({route, navigation}) => {
         }
       });
     });
+    // await channelDoc.update({
+    //   user: true,
+    //   seller: true,
+    // });
     await handleCallNotification(channelDoc.id);
   };
 
@@ -221,16 +249,30 @@ const RTCIndex = ({route, navigation}) => {
       });
     });
   };
-  const endCall = () => {
+
+  const endCall = async () => {
     // Close the peer connection and reset states
     if (pc.current) {
       pc.current.close();
     }
+    await database()
+      .ref(`/Sellers/${channelId}`)
+      .update({
+        callStatus: false,
+      })
+      .then(() => console.log('Data updated.'));
     setLocalStream(null);
     setRemoteStream(null);
     setChannelId(null);
     setWebcamStarted(false);
-    navigation.goBack();
+    // navigation.goBack();
+
+    // if (channelId) {
+    //   const channelDoc = firestore().collection('channels').doc(channelId);
+    //   await channelDoc.update({
+    //     user: false,
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -256,6 +298,40 @@ const RTCIndex = ({route, navigation}) => {
 
     return () => backHandler.remove(); // Remove the event listener on component unmount
   }, []);
+
+  // Inside the RTCIndex component
+  // useEffect(() => {
+  //   startWebcam();
+
+  //   // Initialize RTCPeerConnection and add event listeners
+  //   pc.current = new RTCPeerConnection(servers);
+
+  //   // Add event listener for connection state changes
+  //   pc.current.onconnectionstatechange = event => {
+  //     console.log('Connection state changed:', pc.current.connectionState);
+  //     if (pc.current.connectionState === 'closed') {
+  //       // Peer connection closed
+  //       console.log('Peer connection closed.');
+  //       // Perform any additional actions if needed
+  //     }
+  //   };
+
+  //   // Add event listener for errors
+  //   pc.current.onerror = error => {
+  //     console.error('An error occurred:', error);
+  //     // Handle error appropriately
+  //   };
+
+  //   // Cleanup function: remove event listeners on component unmount
+  //   return () => {
+  //     if (pc.current) {
+  //       pc.current.onconnectionstatechange = null;
+  //       pc.current.onerror = null;
+  //     }
+  //   };
+  // }, []); // Empty dependency array ensures this effect runs only once, like componentDidMount
+
+  // Add event listeners for connection state changes
 
   return (
     <KeyboardAvoidingView style={styles.body} behavior="position">

@@ -41,6 +41,7 @@ const LoginType = () => {
 
     // Get the token
     const token = await messaging().getToken();
+
     try {
       await GoogleSignin.hasPlayServices();
       const {idToken} = await GoogleSignin.signIn();
@@ -50,55 +51,57 @@ const LoginType = () => {
       const userDocRef = firestore().collection('Users').doc(user.uid);
 
       // Check if the user document already exists
-      userDocRef.get().then(docSnapshot => {
-        if (docSnapshot.exists) {
-          // User already exists, you can handle this case accordingly
-          dispatch(addUID(user.uid));
-          console.log('googleUID------->', user.uid);
-          navigation.navigate('SellerScreen');
-          console.log('User already exists!');
-        } else {
-          firestore()
-            .collection('Users')
-            .doc(user.uid)
-            .set({
-              name: user.displayName,
-              email: user.email,
-              photoUrl: user.photoURL,
-              deviceToken: token,
-              OS: Platform.OS,
-              seller: [
-                {
-                  id: '0',
-                  data: {
-                    email: 'deafult@gmail.com',
-                    imageUrl: 'https://picsum.photos/id/1/5000/3333',
-                    name: 'Add',
-                  },
+      const docSnapshot = await userDocRef.get();
+
+      if (docSnapshot.exists) {
+        // User already exists, you can handle this case accordingly
+        dispatch(addUID(user.uid));
+        console.log('googleUID------->', user.uid);
+        navigation.navigate('SellerScreen');
+        console.log('User already exists!');
+      } else {
+        await firestore()
+          .collection('Users')
+          .doc(user.uid)
+          .set({
+            name: user.displayName,
+            email: user.email,
+            photoUrl: user.photoURL,
+            deviceToken: token,
+            OS: Platform.OS,
+            seller: [
+              {
+                id: '0',
+                data: {
+                  email: 'deafult@gmail.com',
+                  imageUrl: 'https://picsum.photos/id/1/5000/3333',
+                  name: 'Add',
                 },
-              ],
-            })
-            .then(() => {
-              dispatch(addUID(user.uid));
-              console.log('googleUID------->', user.uid);
-              navigation.navigate('SellerScreen');
-              console.log('User added!');
-            });
-        }
-      });
+              },
+            ],
+          });
+
+        dispatch(addUID(user.uid));
+        console.log('googleUID------->', user.uid);
+        setTimeout(() => {
+          navigation.navigate('SellerScreen');
+        }, 10000);
+        // navigation.navigate('SellerScreen');
+        console.log('User added!');
+      }
 
       return;
 
       // return auth().signInWithCredential(googleCredential);
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('user canceil the login flow');
+        console.log('user cancelled the login flow');
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log('google sign in is in progress');
+        console.log('google sign-in is in progress');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.log('play services not avaliable or outdated');
+        console.log('play services not available or outdated');
       } else {
-        console.log(error);
+        console.error(error);
       }
     }
   };

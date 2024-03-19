@@ -18,44 +18,55 @@ import {addUID} from '../redux/userTokenSlice';
 import {StartCall} from '../components/WebRTC/StartCall';
 import WebRTC from '../components/WebRTC/WebRTC';
 import RTCIndex from '../components/WebRTC/RTCIndex';
+import LoadingScreen from '../components/Common/LodingScreen';
+import WebRTCIndex from '../components/WebRTCqueue/WebRTCIndex';
 
 const Stack = createStackNavigator();
 
+// ... (previous imports)
+
 const Authnavigation = () => {
-  // const [user, setUser] = useState('');
   const dispatch = useDispatch();
   const user = useSelector(state => state.userToken.UID);
-  console.log('🚀 ~ Authnavigation ~ user:', user);
+  const [authStateChecked, setAuthStateChecked] = useState(false);
 
   useEffect(() => {
     const unregister = auth().onAuthStateChanged(userExist => {
       if (userExist) {
         console.log('userExist.uid firebaseonAuth----->', userExist.uid);
         dispatch(addUID(userExist.uid));
-        // setUser(userExist);
-      } else {
-        // setUser('');
       }
+
+      // Set the authentication state as checked regardless of the user's existence
+      setAuthStateChecked(true);
     });
+
     return () => {
       unregister();
     };
-  }, []);
+  }, [dispatch]);
+
+  // Render nothing until the authentication state is checked
+  if (!authStateChecked) {
+    return <LoadingScreen />; // Replace LoadingScreen with your loading component
+  }
 
   return (
     <>
       <StatusBar barStyle={'light-content'} backgroundColor={COLORS.darkBlue} />
       <Stack.Navigator
-        // initialRouteName="Login"
         screenOptions={{
           headerShown: false,
-        }}>
+        }}
+        // initialRouteName="WebRTCIndex"
+      >
         {user ? (
           <>
+            <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
             <Stack.Screen name="SellerScreen" component={SellerScreen} />
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
-            {/* <Stack.Screen name="WebRTC" component={WebRTC} /> */}
+            <Stack.Screen name="WebRTCIndex" component={WebRTCIndex} />
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
           </>
         ) : (

@@ -5,6 +5,7 @@ export const sharedSlice = createSlice({
   initialState,
   reducers: {
     addUID: (state, action) => {
+      console.log('<---------userADDEDtoStore-------->');
       state.UID = action.payload;
     },
   },

@@ -1,23 +1,24 @@
 {
   "project_info": {
     "project_number": "750688566312",
+    "firebase_url": "https://fasto-5de52-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "fasto-5de52",
     "storage_bucket": "fasto-5de52.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:750688566312:android:efa20085c6355361b0891d",
+        "mobilesdk_app_id": "1:750688566312:android:dcf5f1f08c80f9b6b0891d",
         "android_client_info": {
-          "package_name": "com.fasto_user"
+          "package_name": "com.fasto_seller"
         }
       },
       "oauth_client": [
         {
-          "client_id": "750688566312-jctanh59g62moud40vk5io1fqkfb6g72.apps.googleusercontent.com",
+          "client_id": "750688566312-h54heats2c69j3ei60g4s4o7lf2ug7lo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.fasto_user",
+            "package_name": "com.fasto_seller",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
@@ -44,12 +45,20 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:750688566312:android:933e5e6c8ba1863cb0891d",
+        "mobilesdk_app_id": "1:750688566312:android:efa20085c6355361b0891d",
         "android_client_info": {
-          "package_name": "com.userpanel"
+          "package_name": "com.fasto_user"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "750688566312-jctanh59g62moud40vk5io1fqkfb6g72.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fasto_user",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
         {
           "client_id": "750688566312-2s51gk33qf9ju5e3mfied01npk0ho5eg.apps.googleusercontent.com",
           "client_type": 3
