@@ -23,6 +23,7 @@ import StartWebCam from '../components/WebRTC/StartWebCam';
 import {StartCall, startCall} from '../components/WebRTC/StartCall';
 import database from '@react-native-firebase/database';
 import {Dimensions} from 'react-native';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 const {width, height} = Dimensions.get('window');
 
 const SellerScreen = () => {
@@ -295,7 +296,43 @@ const SellerScreen = () => {
   return (
     <SafeAreaView style={styles.rootContainer}>
       <View style={styles.headerContainer}>
-        <CommonHeader title={'dashboard'} />
+      <Text style={[FONTS.h2, {color: COLORS.black}]}>Workshop Details</Text>
+      <View style={{flexDirection: 'row'}}> 
+      <TouchableOpacity>
+      <VectorIcon
+                  name={'bell'}
+                  type={"Fontisto"}
+                  size={18}
+                  color={COLORS.black}
+                  style={styles.icon1}
+                />
+      </TouchableOpacity>
+      <TouchableOpacity>
+      <VectorIcon
+                  name={'cross'}
+                  type={"Entypo"}
+                  size={25}
+                  color={COLORS.black}
+                  style={styles.icon2}
+                />
+      </TouchableOpacity>
+        
+      </View>
+      </View>
+      <View>
+        <View style={styles.textContainer}>
+        <Text style={[FONTS.body5, {color: COLORS.gray, paddingHorizontal:12,paddingVertical:5,}]}>Workshop Description</Text>
+        <Text style={[FONTS.h1, {color: COLORS.black, paddingVertical: 10, textAlign:'justify',}]}> Session with Joseph Parker</Text>
+        </View>
+        {/* <Text>{new Date()}</Text> */}
+        <View style ={{flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+          <Text style={[FONTS.body5, {color : COLORS.black, margin: 10, padding : 10,}]}>11:30am</Text>
+          <Text style={[FONTS.body5, {color : COLORS.black, margin: 10, padding : 10,}]}>March 24, 2022</Text>
+        </View>
+        <View style ={{flexDirection: 'row', justifyContent:'space-between'}}>
+          <Text style={styles.filter}>Relationship</Text>
+          <Text style={styles.filter}>Personal Growth</Text>
+        </View>
       </View>
       <View style={styles.mainContainer}>
         <Text style={[FONTS.body2, styles.text2]}>
@@ -383,14 +420,47 @@ const styles = StyleSheet.create({
     flex: 1,
     // paddingVertical: 20,
     // paddingHorizontal: 10,
-    backgroundColor: COLORS.secondaryBackground,
+    backgroundColor: COLORS.white,
     height: height,
     width: width,
+    paddingHorizontal: 10,
   },
   headerContainer: {
     backgroundColor: COLORS.white,
-    paddingHorizontal: 5,
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems:'center',
+  },
+icon1:{
+color: COLORS.black,
+borderWidth: 0.5,
+margin: 5,
+paddingHorizontal:13,
+paddingVertical : 12,
+borderRadius: 40,
+borderColor: 'grey',
+},
+icon2:{
+  color: COLORS.black,
+  borderWidth: 0.5,
+  margin: 5,
+  padding:8,
+  borderRadius: 40,
+  borderColor: 'grey',
+  },
+  textContainer:{
+    margin : 5,
+  },
+  filter :{
+    backgroundColor : 'red',
+    color: 'white',
+    ...FONTS.body5 ,
+    // margin: 10, 
+    paddingHorizontal : 10,
     paddingTop: 10,
+    paddingBottom: 5,
+    borderRadius: 20,
   },
   mainContainer: {
     backgroundColor: COLORS.white,
