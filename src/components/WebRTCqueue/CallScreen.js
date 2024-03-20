@@ -26,6 +26,7 @@ import microphoneImage from '../../assets/images/microphone.png';
 import InCallManager from 'react-native-incall-manager';
 import speakerOnImg from '../../assets/images/speaker.png';
 import speakerOfImg from '../../assets/images/speaker-filled-audio-tool.png';
+import uuid from 'react-native-uuid';
 import WaitingQueue from '../../screens/WaitingQueue';
 const configuration = {
   iceServers: [
@@ -286,12 +287,14 @@ export default function CallScreen({
     };
     console.log('seller Id in call screen -----------------', sellerId);
     console.log('renderd ---------------------------again ----------------');
-
+    const uniqueChannelId = uuid.v4();
+    const timestamp = Date.now().toString();
+    const docId = `${timestamp}_${uniqueChannelId}`;
     const roomRef = firestore()
       .collection('videoRoom')
       .doc(sellerId)
       .collection('rooms')
-      .doc();
+      .doc(docId);
 
     const currCallDataRef = roomRef.collection('currCallData').doc(sellerId);
 
