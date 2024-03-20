@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   BackHandler,
+  ActivityIndicator,
 } from 'react-native';
 
 import {
@@ -25,6 +26,7 @@ import microphoneImage from '../../assets/images/microphone.png';
 import InCallManager from 'react-native-incall-manager';
 import speakerOnImg from '../../assets/images/speaker.png';
 import speakerOfImg from '../../assets/images/speaker-filled-audio-tool.png';
+import WaitingQueue from '../../screens/WaitingQueue';
 const configuration = {
   iceServers: [
     {
@@ -40,6 +42,7 @@ export default function CallScreen({
   roomId,
   navigation,
   sellerId,
+  clickedSellerData,
 }) {
   const [startWebCamState, setStartWebCamState] = useState();
   const [speakerOn, setSpeakerOn] = useState(false);
@@ -49,7 +52,8 @@ export default function CallScreen({
   const [cachedLocalPC, setCachedLocalPC] = useState();
   const [channelId, setChannelId] = useState();
   const [isMuted, setIsMuted] = useState(false);
-
+  const [queueIdx, setQueueIdx] = useState(-2);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const userUID = useSelector(state => state.userToken.UID);
   const userData = useSelector(state => state.userData.user);
   console.log(
@@ -302,7 +306,9 @@ export default function CallScreen({
       {merge: true},
     );
     setChannelId(roomRef.id);
-    handleCallNotification(roomRef.id);
+    // if (queueIdx == 0) {
+    //   handleCallNotification(roomRef.id);
+    // }
     const unsubscribe = database()
       .ref(`/Sellers/${roomRef.id}`)
       .on('value', snapshot => {
@@ -395,66 +401,138 @@ export default function CallScreen({
       startCall();
     }
   }, [startWebCamState]);
+  useEffect(() => {
+    // This effect will run whenever 'yourState' changes
+    console.log('inside handle call notificatoin useEffect');
+    if (queueIdx === 0) {
+      handleCallNotification(channelId);
+      console.log('inside handle call notificatoin useEffect iffffff');
+    }
+  }, [queueIdx]);
+  let allRooms = [];
+  useEffect(() => {
+    const fetchAllRoomsInRealTime = async () => {
+      await firestore()
+        .collection('videoRoom')
+        .doc(clickedSellerData.id)
+        .collection('rooms')
+        .onSnapshot(
+          querySnapshot => {
+            // Clear the array before updating it with new values
+            let allRooms = [];
+
+            // Loop through each document in the query snapshot
+            querySnapshot.forEach(doc => {
+              // Get the channelId from each document and push it to the array
+              allRooms.push(doc.id);
+            });
+
+            // Update the index of the target ID
+            const targetIdIndex = allRooms.indexOf(channelId); // Replace yourId with your actual ID
+            setQueueIdx(targetIdIndex);
+
+            // Now, allRooms array contains all channelId values
+            console.log('Channel IDs:', allRooms);
+            console.log('Index of target ID:', targetIdIndex);
+            console.log('🚀 ~ WaitingQueue ~ userData:', userData.userUid);
+            const newTime = new Date();
+            newTime.setMinutes(newTime.getMinutes() + targetIdIndex * 5);
+            setCurrentTime(newTime);
+          },
+          error => {
+            console.error('Error fetching channel IDs:', error);
+          },
+        );
+    };
+
+    // Call fetchAllRooms when component mounts
+    if (channelId) {
+      fetchAllRoomsInRealTime();
+    }
+
+    // Clean up function
+    return () => {
+      // Clean up any event listeners or subscriptions if necessary
+    };
+  }, [channelId]);
+  console.log(
+    'channelIdchannelIdchannelIdchannelIdchannelIdchannelId',
+    channelId,
+  );
+  console.log('queueIndex????????????????????________???????', queueIdx);
   return (
     <>
-      {/* <Text style={styles.heading}>Join Screen</Text> */}
-      {/* <Text style={styles.heading}>Room : {roomId}</Text> */}
-
-      {/* <View style={styles.callButtons}> */}
-
-      <View style={{display: 'flex', flex: 1}}>
-        <View style={styles.rtcview}>
-          {localStream && (
-            <RTCView
-              style={styles.rtc}
-              streamURL={localStream && localStream.toURL()}
-            />
-          )}
+      {queueIdx === -2 ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size="large" />
         </View>
-        {remoteStream && (
-          <View style={styles.rtcview}>
-            <RTCView
-              style={styles.rtc}
-              streamURL={remoteStream && remoteStream.toURL()}
-            />
+      ) : queueIdx <= 0 ? (
+        <>
+          {/* <Text style={styles.heading}>Join Screen</Text> */}
+          {/* <Text style={styles.heading}>Room : {roomId}</Text> */}
+
+          {/* <View style={styles.callButtons}> */}
+
+          <View style={{display: 'flex', flex: 1}}>
+            <View style={styles.rtcview}>
+              {localStream && (
+                <RTCView
+                  style={styles.rtc}
+                  streamURL={localStream && localStream.toURL()}
+                />
+              )}
+            </View>
+            {remoteStream && (
+              <View style={styles.rtcview}>
+                <RTCView
+                  style={styles.rtc}
+                  streamURL={remoteStream && remoteStream.toURL()}
+                />
+              </View>
+            )}
           </View>
-        )}
-      </View>
-      <View style={{flexDirection: 'row'}}>
-        <View style={styles.toggleButtons}>
-          <TouchableOpacity>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={require('../../assets/images/chat.png')}
-            />
-          </TouchableOpacity>
+          <View style={{flexDirection: 'row'}}>
+            <View style={styles.toggleButtons}>
+              <TouchableOpacity>
+                <Image
+                  style={{width: 40, height: 40, marginTop: 4}}
+                  source={require('../../assets/images/chat.png')}
+                />
+              </TouchableOpacity>
 
-          <TouchableOpacity onPress={toggleSpeaker}>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={speakerOn ? speakerOfImg : speakerOnImg}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={switchCamera}>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={require('../../assets/images/switch-camera.png')}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={toggleMute}>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={isMuted ? muteMicrophoneImage : microphoneImage}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => onBackPress(channelId)}>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={require('../../assets/images/phone-call-end.png')}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+              <TouchableOpacity onPress={toggleSpeaker}>
+                <Image
+                  style={{width: 40, height: 40, marginTop: 4}}
+                  source={speakerOn ? speakerOfImg : speakerOnImg}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={switchCamera}>
+                <Image
+                  style={{width: 40, height: 40, marginTop: 4}}
+                  source={require('../../assets/images/switch-camera.png')}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={toggleMute}>
+                <Image
+                  style={{width: 40, height: 40, marginTop: 4}}
+                  source={isMuted ? muteMicrophoneImage : microphoneImage}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => onBackPress(channelId)}>
+                <Image
+                  style={{width: 40, height: 40, marginTop: 4}}
+                  source={require('../../assets/images/phone-call-end.png')}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </>
+      ) : (
+        <WaitingQueue
+          clickedSellerData={clickedSellerData}
+          channelId={channelId}
+        />
+      )}
     </>
   );
 }

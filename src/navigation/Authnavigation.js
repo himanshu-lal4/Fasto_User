@@ -23,6 +23,7 @@ import WebRTCIndex from '../components/WebRTCqueue/WebRTCIndex';
 import {addUserData} from '../redux/userDataSlice';
 import firestore from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
+import WaitingQueue from '../screens/WaitingQueue';
 const Stack = createStackNavigator();
 
 // ... (previous imports)
@@ -88,7 +89,7 @@ const Authnavigation = () => {
         screenOptions={{
           headerShown: false,
         }}
-        // initialRouteName="WebRTCIndex"
+        // initialRouteName="WaitingQueue"
       >
         {user ? (
           <>
@@ -96,6 +97,7 @@ const Authnavigation = () => {
             <Stack.Screen name="SellerScreen" component={SellerScreen} />
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
+            <Stack.Screen name="WaitingQueue" component={WaitingQueue} />
             <Stack.Screen name="WebRTCIndex" component={WebRTCIndex} />
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
           </>

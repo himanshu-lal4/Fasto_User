@@ -33,6 +33,7 @@ const SellerScreen = () => {
   const [clickedSellerID, setClickedSellerID] = useState(null);
   const [clickedSellerDeviceToken, setClickedSellerDeviceToken] =
     useState(null);
+  const [clickedSellerData, setClickedSellerData] = useState(null);
   const [sellerId, setSellerId] = useState(null);
   const requestCameraPermission = async () => {
     try {
@@ -142,6 +143,7 @@ const SellerScreen = () => {
           const sellerData = doc.data();
           // console.log('Seller Data:', sellerData.deviceToken);
           // sellerFcmToken = sellerData.deviceToken;
+
           setClickedSellerDeviceToken(sellerData.deviceToken);
         } else {
           console.log('No such document 147!');
@@ -178,6 +180,7 @@ const SellerScreen = () => {
           setDeviceToken(item.id);
           setSellerId(item.id);
           console.log('seller is ------------------------->', item);
+          setClickedSellerData(item);
           console.log('itemId---------->', item.id);
           setModalVisible(true);
         }}>
@@ -337,8 +340,9 @@ const SellerScreen = () => {
                   navigation.navigate('WebRTCIndex', {
                     clickedSellerDeviceToken,
                     sellerId,
+                    clickedSellerData,
                   });
-                  // navigation.navigate('WebRTCIndex');
+                  // navigation.navigate('WaitingQueue', {clickedSellerData});
                   setModalVisible(false);
                 }}>
                 <VectorIcon

@@ -10,6 +10,7 @@ import CallScreen from './CallScreen';
 import JoinScreen from './JoinScreen';
 
 export default function WebRTCIndex({route, navigation}) {
+  const {clickedSellerData} = route.params;
   const {clickedSellerDeviceToken} = route.params;
   const {sellerId} = route.params;
   const screens = {
@@ -43,6 +44,7 @@ export default function WebRTCIndex({route, navigation}) {
           setScreen={setScreen}
           navigation={navigation}
           sellerId={sellerId}
+          clickedSellerData={clickedSellerData}
         />
       );
       break;
