@@ -53,7 +53,7 @@ const Authnavigation = () => {
 
   return (
     <>
-      <StatusBar barStyle={'light-content'} backgroundColor={COLORS.darkBlue} />
+      <StatusBar barStyle={'dark-content'} backgroundColor={COLORS.white} />
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

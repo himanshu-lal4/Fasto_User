@@ -37,6 +37,7 @@ export const SIZES = {
   body3: 20,
   body4: 16,
   body5: 14,
+  body6: 12,
 
   // app dimensions
   width,
@@ -66,6 +67,7 @@ export const FONTS = {
   body3: {fontFamily: 'Nunito-Regular', fontSize: SIZES.body3, lineHeight: 22},
   body4: {fontFamily: 'Nunito-Regular', fontSize: SIZES.body4, lineHeight: 22},
   body5: {fontFamily: 'Nunito-Regular', fontSize: SIZES.body5, lineHeight: 14},
+  body6: {fontFamily: 'Nunito-Regular', fontSize: SIZES.body6, lineHeight: 12},
 };
 
 const appTheme = {COLORS, SIZES, FONTS};
