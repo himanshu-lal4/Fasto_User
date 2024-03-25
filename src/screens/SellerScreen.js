@@ -4,13 +4,13 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
-  ActivityIndicator,
   Modal,
+  Animated,
+  Easing,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import VectorIcon from '../assets/VectorIcon/VectorIcon';
 import {DummyData} from '../components/SellerScreen/DummyData';
 import {COLORS, FONTS} from '../assets/theme';
@@ -24,9 +24,8 @@ import StartWebCam from '../components/WebRTC/StartWebCam';
 import {StartCall, startCall} from '../components/WebRTC/StartCall';
 import database from '@react-native-firebase/database';
 import {Dimensions} from 'react-native';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {ScrollView} from 'react-native-virtualized-view';
-import {isArrayLiteralExpression} from 'typescript';
+import {Shadow} from 'react-native-shadow-2';
 
 const {width, height} = Dimensions.get('window');
 
@@ -36,8 +35,9 @@ const SellerScreen = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [clickedSeller, setClickedSeller] = useState(null);
-  // const [loading, setLoading] = useState(true); // State to manage loading animation
-  // const [pop, setPop] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const spinValue = useRef(new Animated.Value(0)).current;
+  const shakeValue = new Animated.Value(0);
   const [clickedSellerDeviceToken, setClickedSellerDeviceToken] =
     useState(null);
   const requestCameraPermission = async () => {
@@ -95,8 +95,7 @@ const SellerScreen = () => {
           .update({
             seller: firestore.FieldValue.arrayUnion(obj),
           });
-        // setLoading(false);
-        // setPop(true);
+        // setIsLoading(false);
         console.log('New seller added to Firestore!');
       } else {
         console.log('No such document!');
@@ -116,10 +115,8 @@ const SellerScreen = () => {
       if (user.exists) {
         const sellerData = user.data().seller;
         const sortedSellerData = sellerData ? sellerData : [];
-
+        // setIsLoading(false);
         setSellerData(sortedSellerData);
-        // setLoading(false);
-        // setPop(true);
       } else {
         console.log('User document not found');
       }
@@ -140,14 +137,32 @@ const SellerScreen = () => {
     fetchData();
   }, [userToken]);
 
-  // useEffect(() => {
-  //   if (!loading) {
-  //     setPop(true); // Trigger pop animation when loading is complete
-  //     setTimeout(() => {
-  //       setPop(false); // Reset pop animation after a short delay
-  //     }, 1000); // Adjust the delay as needed
-  //   }
-  // }, [loading]);
+  useEffect(() => {
+    Animated.timing(spinValue, {
+      toValue: 1,
+      duration: 1000,
+      // easing: Easing.linear,
+      useNativeDriver: true,
+    }).start();
+
+    // else {
+    //   Animated.sequence([
+    //     Animated.timing(shakeValue, { toValue: 10, duration: 100, useNativeDriver: true }),
+    //     Animated.timing(shakeValue, { toValue: -10, duration: 100, useNativeDriver: true }),
+    //     Animated.timing(shakeValue, { toValue: 0, duration: 100, useNativeDriver: true }),
+    //   ]).start();
+    // }
+  }, []);
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const shake = shakeValue.interpolate({
+    inputRange: [-10, 10],
+    outputRange: ['-10deg', '10deg'],
+  });
 
   async function setDeviceToken(itemId) {
     await firestore()
@@ -169,6 +184,10 @@ const SellerScreen = () => {
         console.error('Error getting seller document:', error);
       });
   }
+
+  const handleImageLoad = () => {
+    setIsLoading(false);
+  };
 
   const renderItem = ({item}) => {
     return item.id == 0 ? (
@@ -196,80 +215,41 @@ const SellerScreen = () => {
           setDeviceToken(item.id);
           setModalVisible(true);
         }}>
-        <View style={styles.imgContainer}>
-          <Image style={styles.img} source={{uri: item.data.imageUrl}} />
+        {/* <Animated.View
+          style={[styles.imgContainer, {transform: [{rotate: shake}]}]}>
+          {isLoading && (
+          <Animated.View style={[styles.loader, {transform: [{rotate: spin}]}]}>
+            <View style={styles.loaderInner} />
+          </Animated.View>
+          )}
+          <Image
+            style={styles.img}
+            source={{uri: item.data.imageUrl}}
+            onLoad={handleImageLoad}
+          />
+        </Animated.View> */}
+        <View style={styles.spinnerContainer}>
+          <Animated.View style={[styles.loader, {transform: [{rotate: spin}]}]}>
+            {/* <Image
+              style={styles.img}
+              source={{uri: item.data.imageUrl}}
+              onLoad={handleImageLoad}
+            /> */}
+          </Animated.View>
         </View>
         <Text style={[FONTS.body3, styles.text]}>{item.data.name}</Text>
       </TouchableOpacity>
     );
   };
 
-  async function handleCallNotification() {
-    // const message = {
-    //   to: clickedSellerDeviceToken,
-    //   notification: {
-    //     title: '📲Fasto user Calling',
-    //     body: '📞📞Call from a fasto user📞📞',
-    //   },
-    //   data: {
-    //     // You can include additional data if needed
-    //     // ...
-    //     channelId: channelId,
-    //   },
-    // };
-    // console.log('clickedSellerDeviceToken', clickedSellerDeviceToken);
-    // const message = {
-    //   to: clickedSellerDeviceToken,
-    //   notification: {
-    //     title: '📲Fasto user Calling',
-    //     body: '📞📞Call from a fasto user📞📞',
-    //   },
-    //   data: {
-    //     channelId: `${clickedSellerDeviceToken}`,
-    //     userUID: userUID,
-    //     // Add more key-value pairs as needed
-    //   },
-    // };
-    // await fetch('https://fcm.googleapis.com/fcm/send', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization:
-    //       'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
-    //   },
-    //   body: JSON.stringify(message),
-    // });
-    // try {
-    //   console.log('inside endCall try');
-    //   const roomRef = database().ref(`/Sellers/${clickedSellerDeviceToken}`);
-    //   // Check if the room already exists
-    //   roomRef.once('value', async snapshot => {
-    //     if (snapshot.exists()) {
-    //       // If room exists, update its data
-    //       await roomRef.update({
-    //         userCallStatus: 'truing',
-    //         sellerCallStatus: 'something',
-    //       });
-    //       console.log('Data updated------------>', clickedSellerDeviceToken);
-    //     } else {
-    //       // If room doesn't exist, set its data
-    //       await roomRef.set({
-    //         userCallStatus: 'setting tr',
-    //         sellerCallStatus: 'settin some',
-    //       });
-    //       console.log('Data set------------>', clickedSellerDeviceToken);
-    //     }
-    //   });
-    //   console.log('after endCall try');
-    // } catch (error) {
-    //   console.error('Error updating data:', error);
-    // }
-  }
+  async function handleCallNotification() {}
 
   // Called the function to send the notification
   return (
     <SafeAreaView style={styles.rootContainer}>
-      <ScrollView>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}>
         <View style={styles.headerContainer}>
           <Text style={styles.mainHeaderText}>Workshop details</Text>
           <View style={{flexDirection: 'row'}}>
@@ -296,11 +276,7 @@ const SellerScreen = () => {
         <View>
           <View style={styles.textContainer}>
             <Text style={styles.headerText}>Workshop Description</Text>
-            <Text
-              style={[
-                FONTS.h1,
-                {color: COLORS.black, paddingTop: 2, textAlign: 'justify'},
-              ]}>
+            <Text style={[FONTS.h1, {color: COLORS.black, paddingTop: 2}]}>
               Session with Joseph Parker
             </Text>
           </View>
@@ -349,96 +325,96 @@ const SellerScreen = () => {
       <Modal
         // animationType="slide"
         transparent={true}
-        style={styles.Modal}
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(false);
         }}>
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.actions}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={async () => {
-                  console.log('Calling action');
-                  // handleCallNotification();
-                  // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
-                  handleCallNotification();
-                  navigation.navigate('WebRTCIndex', {
-                    clickedSellerDeviceToken,
-                  });
-                  // navigation.navigate('WebRTCIndex');
-                  setModalVisible(false);
-                }}>
-                <VectorIcon
-                  name={'call'}
-                  type={'Ionicons'}
-                  size={25}
-                  color={COLORS.gray}
-                />
-              </TouchableOpacity>
+          <Shadow
+            distance={6}
+            stretch={false}
+            // offset={[0, 0]}
+            style={styles.actions}
+            startColor={COLORS.white1}
+            endColor={COLORS.white}>
+            {/* <View style={styles.actions}> */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={async () => {
+                console.log('Calling action');
+                // handleCallNotification();
+                // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
+                handleCallNotification();
+                navigation.navigate('WebRTCIndex', {
+                  clickedSellerDeviceToken,
+                });
+                // navigation.navigate('WebRTCIndex');
+                setModalVisible(false);
+              }}>
+              <VectorIcon
+                name={'video'}
+                type={'Feather'}
+                size={25}
+                color={COLORS.gray}
+              />
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => {
-                  console.log('Messaging action');
-                  setModalVisible(false);
-                }}>
-                <VectorIcon
-                  name={'android-messages'}
-                  type={'MaterialCommunityIcons'}
-                  size={25}
-                  color={COLORS.gray}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={async () => {
-                  console.log('Calling action');
-                  // handleCallNotification();
-                  // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
-                  handleCallNotification();
-                  navigation.navigate('WebRTCIndex', {
-                    clickedSellerDeviceToken,
-                  });
-                  // navigation.navigate('WebRTCIndex');
-                  setModalVisible(false);
-                }}>
-                <VectorIcon
-                  name={'call'}
-                  type={'Ionicons'}
-                  size={25}
-                  color={COLORS.gray}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => {
-                  console.log('Messaging action');
-                  setModalVisible(false);
-                }}>
-                <VectorIcon
-                  name={'android-messages'}
-                  type={'MaterialCommunityIcons'}
-                  size={25}
-                  color={COLORS.gray}
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.cross}>
-              <TouchableOpacity
-                style={{alignSelf: 'center'}}
-                onPress={() => setModalVisible(false)}>
-                <VectorIcon
-                  name={'cross'}
-                  type={'Entypo'}
-                  size={25}
-                  color={COLORS.darkBlue}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                console.log('Messaging action');
+                setModalVisible(false);
+              }}>
+              <VectorIcon
+                name={'android-messages'}
+                type={'MaterialCommunityIcons'}
+                size={25}
+                color={COLORS.gray}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={async () => {
+                console.log('Calling action');
+                // handleCallNotification();
+                // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
+                handleCallNotification();
+                navigation.navigate('WebRTCIndex', {
+                  clickedSellerDeviceToken,
+                });
+                // navigation.navigate('WebRTCIndex');
+                setModalVisible(false);
+              }}>
+              <VectorIcon
+                name={'call'}
+                type={'Ionicons'}
+                size={25}
+                color={COLORS.gray}
+              />
+            </TouchableOpacity>
+          </Shadow>
+          <Shadow
+            distance={6}
+            stretch={false}
+            style={{
+              justifyContent: 'center',
+              borderRadius: 50,
+              width: 62,
+              height: 62,
+            }}
+            startColor={COLORS.white1}
+            endColor={COLORS.white}>
+            <TouchableOpacity
+              style={{alignSelf: 'center', paddingVertical: '8%'}}
+              onPress={() => setModalVisible(false)}>
+              <VectorIcon
+                name={'cross'}
+                type={'Entypo'}
+                size={30}
+                color={'red'}
+              />
+            </TouchableOpacity>
+          </Shadow>
         </View>
       </Modal>
     </SafeAreaView>
@@ -450,7 +426,6 @@ export default SellerScreen;
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    // paddingVertical: 20,
     paddingHorizontal: 20,
     backgroundColor: 'white',
     height: height,
@@ -577,58 +552,106 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 45,
     overflow: 'hidden',
-    // elevation: 5, // This property is for Android
   },
   modalContainer: {
-    width: width * 0.8,
-    alignSelf: 'center',
     position: 'absolute',
-    bottom: 15,
-    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
+    bottom: 0,
+    width: '100%',
+    height: '12%',
     flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingHorizontal: '12%',
+    borderColor: 'green',
+  },
+  button: {
+    paddingHorizontal: '10%',
+  },
+  actions: {
+    borderRadius: 50,
+    paddingVertical: '8%',
+    flexDirection: 'row',
+    width: 210,
+    height: 62,
+    justifyContent: 'space-evenly',
+  },
+  loader: {
+    // borderWidth: 3,
+    // borderColor: 'red',
+    // borderRadius: 50,
+    // width: '100%',
+    // height: '100%',
+    // justifyContent: 'center',
+    // alignItems: 'center',
+    height: 80,
+    width: 80,
+    borderRadius: 50,
+    borderWidth: 5,
+    // borderColor: 'transparent',
+    borderTopColor: 'red',
+  },
+  spinnerContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  actions: {
-    width: '70%',
+  loaderInner: {
+    width: 50,
+    height: 50,
     backgroundColor: COLORS.white,
-    elevation: 20,
-    // padding: '3%',
-    borderWidth: 0.3,
-    borderColor: COLORS.gray,
-    borderRadius: 30,
-    marginHorizontal: '2%',
-    paddingHorizontal: '8%',
-    paddingVertical: '6%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  // button: {
-  //   borderColor: COLORS.white,
-  //   paddingVertical: 10,
-  //   paddingHorizontal: '6%',
-  // },
-  // buttonText: {
-  //   color: COLORS.white,
-  //   fontSize: 16,
-  // },
-  cross: {
-    width: '20%',
-    backgroundColor: COLORS.white,
-    elevation: 20,
-    borderWidth: 0.3,
-    borderColor: COLORS.gray,
-    // padding: '3%',
-    borderRadius: 30,
-    marginHorizontal: '5%',
-    // paddingHorizontal : '8%',
-    paddingVertical: '6%',
-    alignSelf: 'center',
   },
 });
+
+//   return (
+//     <View style={styles.container}>
+//       <TouchableWithoutFeedback onPress={() => console.log('Image clicked')}>
+//         <Animated.View style={[styles.imageContainer, { transform: [{ rotate: shake }] }]}>
+//           {isLoading && (
+//             <Animated.View style={[styles.loader, { transform: [{ rotate: spin }] }]}>
+//               <View style={styles.loaderInner} />
+//             </Animated.View>
+//           )}
+//           <Image
+//             source={{ uri: 'your_image_url_here' }}
+//             style={styles.image}
+//             onLoad={handleImageLoad}
+//           />
+//         </Animated.View>
+//       </TouchableWithoutFeedback>
+//     </View>
+//   );
+// };
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   imageContainer: {
+//     position: 'relative',
+//   },
+//   loader: {
+//     position: 'absolute',
+//     borderWidth: 2,
+//     borderColor: 'rgba(255,255,255,0.4)',
+//     borderRadius: 10,
+//     width: '100%',
+//     height: '100%',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   loaderInner: {
+//     width: 20,
+//     height: 20,
+//     borderRadius: 10,
+//     backgroundColor: 'rgba(255,255,255,0.4)',
+//   },
+//   image: {
+//     width: 200,
+//     height: 200,
+//     borderRadius: 10,
+//   },
+// });
 
 {
   /* <View style={styles.textInputContainer}>
@@ -746,3 +769,101 @@ const styles = StyleSheet.create({
 // } catch (error) {
 //   console.error('Error updating data:', error);
 // }
+
+// import React, { useState, useEffect } from 'react';
+// import { View, Image, TouchableWithoutFeedback, Animated, Easing, StyleSheet } from 'react-native';
+
+// const ImageLoader = () => {
+//   const [isLoading, setIsLoading] = useState(true);
+//   const spinValue = new Animated.Value(0);
+//   const shakeValue = new Animated.Value(0);
+
+//   useEffect(() => {
+//     if (isLoading) {
+//       Animated.loop(
+//         Animated.timing(
+//           spinValue,
+//           {
+//             toValue: 1,
+//             duration: 1500,
+//             easing: Easing.linear,
+//             useNativeDriver: true,
+//           }
+//         )
+//       ).start();
+//     } else {
+//       Animated.sequence([
+//         Animated.timing(shakeValue, { toValue: 10, duration: 100, useNativeDriver: true }),
+//         Animated.timing(shakeValue, { toValue: -10, duration: 100, useNativeDriver: true }),
+//         Animated.timing(shakeValue, { toValue: 0, duration: 100, useNativeDriver: true }),
+//       ]).start();
+//     }
+//   }, [isLoading]);
+
+//   const spin = spinValue.interpolate({
+//     inputRange: [0, 1],
+//     outputRange: ['0deg', '360deg']
+//   });
+
+//   const shake = shakeValue.interpolate({
+//     inputRange: [-10, 10],
+//     outputRange: ['-10deg', '10deg']
+//   });
+
+//   const handleImageLoad = () => {
+//     setIsLoading(false);
+//   };
+
+//   return (
+//     <View style={styles.container}>
+//       <TouchableWithoutFeedback onPress={() => console.log('Image clicked')}>
+//         <Animated.View style={[styles.imageContainer, { transform: [{ rotate: shake }] }]}>
+//           {isLoading && (
+//             <Animated.View style={[styles.loader, { transform: [{ rotate: spin }] }]}>
+//               <View style={styles.loaderInner} />
+//             </Animated.View>
+//           )}
+//           <Image
+//             source={{ uri: 'your_image_url_here' }}
+//             style={styles.image}
+//             onLoad={handleImageLoad}
+//           />
+//         </Animated.View>
+//       </TouchableWithoutFeedback>
+//     </View>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   imageContainer: {
+//     position: 'relative',
+//   },
+//   loader: {
+//     position: 'absolute',
+//     borderWidth: 2,
+//     borderColor: 'rgba(255,255,255,0.4)',
+//     borderRadius: 10,
+//     width: '100%',
+//     height: '100%',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   loaderInner: {
+//     width: 20,
+//     height: 20,
+//     borderRadius: 10,
+//     backgroundColor: 'rgba(255,255,255,0.4)',
+//   },
+//   image: {
+//     width: 200,
+//     height: 200,
+//     borderRadius: 10,
+//   },
+// });
+
+// export default ImageLoader;

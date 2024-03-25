@@ -20,6 +20,7 @@ import WebRTC from '../components/WebRTC/WebRTC';
 import RTCIndex from '../components/WebRTC/RTCIndex';
 import LoadingScreen from '../components/Common/LodingScreen';
 import WebRTCIndex from '../components/WebRTCqueue/WebRTCIndex';
+import MessagingScreen from '../screens/MessagingScreen';
 
 const Stack = createStackNavigator();
 
@@ -68,6 +69,7 @@ const Authnavigation = () => {
             <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
             <Stack.Screen name="WebRTCIndex" component={WebRTCIndex} />
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
+            <Stack.Screen name="Message" component={MessagingScreen} />
           </>
         ) : (
           <>
