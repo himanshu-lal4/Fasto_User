@@ -215,28 +215,30 @@ const SellerScreen = () => {
           setDeviceToken(item.id);
           setModalVisible(true);
         }}>
-        {/* <Animated.View
+        <Animated.View
           style={[styles.imgContainer, {transform: [{rotate: shake}]}]}>
           {isLoading && (
-          <Animated.View style={[styles.loader, {transform: [{rotate: spin}]}]}>
-            <View style={styles.loaderInner} />
-          </Animated.View>
+            <Animated.View
+              style={[styles.loader, {transform: [{rotate: spin}]}]}>
+              <View style={styles.loaderInner} />
+            </Animated.View>
           )}
           <Image
             style={styles.img}
             source={{uri: item.data.imageUrl}}
             onLoad={handleImageLoad}
           />
-        </Animated.View> */}
+        </Animated.View>
+        {/* <Image
+          style={styles.img}
+          source={{uri: item.data.imageUrl}}
+          onLoad={handleImageLoad}
+        />
         <View style={styles.spinnerContainer}>
-          <Animated.View style={[styles.loader, {transform: [{rotate: spin}]}]}>
-            {/* <Image
-              style={styles.img}
-              source={{uri: item.data.imageUrl}}
-              onLoad={handleImageLoad}
-            /> */}
-          </Animated.View>
-        </View>
+          <Animated.View
+            style={[styles.loader, {transform: [{rotate: spin}]}]}
+          />
+        </View> */}
         <Text style={[FONTS.body3, styles.text]}>{item.data.name}</Text>
       </TouchableOpacity>
     );
@@ -587,8 +589,10 @@ const styles = StyleSheet.create({
     width: 80,
     borderRadius: 50,
     borderWidth: 5,
-    // borderColor: 'transparent',
-    borderTopColor: 'red',
+    borderBottomColor: COLORS.white,
+    borderTopColor: COLORS.blue,
+    borderLeftColor: COLORS.white,
+    borderRightColor: COLORS.white,
   },
   spinnerContainer: {
     flex: 1,
