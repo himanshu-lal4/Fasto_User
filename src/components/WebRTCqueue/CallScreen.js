@@ -57,10 +57,6 @@ export default function CallScreen({
   const [currentTime, setCurrentTime] = useState(new Date());
   const userUID = useSelector(state => state.userToken.UID);
   const userData = useSelector(state => state.userData.user);
-  console.log(
-    '🚀 ~<=======++++=====++++====+++++==== sellerData:=======++++=====++++====+++++====>',
-    userData,
-  );
   async function onBackPress(id) {
     if (cachedLocalPC) {
       localStream.getTracks().forEach(track => {
@@ -72,11 +68,9 @@ export default function CallScreen({
     setRemoteStream();
     setCachedLocalPC();
     try {
-      console.log('inside endCall try');
       await database().ref(`/Sellers/${id}`).update({
         userCallStatus: false,
       });
-      console.log('after endCall try');
       console.log('Data updated.', roomId);
     } catch (error) {
       console.error('Error updating data:', error);
@@ -231,52 +225,159 @@ export default function CallScreen({
     setStartWebCamState(true);
   };
   async function handleCallNotification(id) {
-    console.log('clickedSellerDeviceToken', id);
-    const message = {
-      to: roomId,
-      notification: {
-        title: '📲Fasto user Calling',
-        body: '📞📞Call from a fasto user📞📞',
-      },
-      data: {
-        channelId: `${id}`,
-        userUID: userUID,
-      },
-    };
-
-    await fetch('https://fcm.googleapis.com/fcm/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization:
-          'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F',
-      },
-      body: JSON.stringify(message),
+    const sellerRef = database().ref(`/SellersOnCallStatus/${sellerId}`);
+    sellerRef.once('value', async snapshot => {
+      const sellerData = snapshot.val();
+      console.log('sellerData------------->', sellerData);
+      console.log(
+        'sellerData.isSellerOnCall------------->',
+        sellerData.isSellerOnCall,
+      );
+      if (sellerData && sellerData.isSellerOnCall === true) {
+        // Seller exists and is already on another call, send notification A
+        console.log(
+          '########################################################################################',
+        );
+        sendNotificationTypeA(id);
+      } else {
+        // Seller doesn't exist or is available, send notification B
+        console.log(
+          '***************************************************************************************************************',
+        );
+        sendNotificationTypeB(id);
+      }
     });
 
+    async function sendNotification(message) {
+      await fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization:
+            'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
+        },
+        body: JSON.stringify(message),
+      });
+    }
+    async function sendNotificationTypeA(id) {
+      const message = {
+        to: roomId,
+        notification: {
+          title: 'Another user Calling',
+          body: 'The user is waiting in the queue.',
+        },
+        data: {
+          channelId: `${id}`,
+          userUID: userUID,
+          notificationType: 'typeA',
+        },
+      };
+
+      await sendNotification(message);
+    }
+
+    // Function to send notification type B
+    async function sendNotificationTypeB(id) {
+      const message = {
+        to: roomId,
+        notification: {
+          title: '📲Fasto user Calling',
+          body: '📞📞Call from a fasto user📞📞',
+        },
+        data: {
+          channelId: `${id}`,
+          userUID: userUID,
+          notificationType: 'typeB',
+        },
+      };
+
+      await sendNotification(message);
+    }
+    // const message = {
+    //   to: roomId,
+    //   notification: {
+    //     title: '📲Fasto user Calling',
+    //     body: '📞📞Call from a fasto user📞📞',
+    //   },
+    //   data: {
+    //     channelId: `${id}`,
+    //     userUID: userUID,
+    //   },
+    // };
+
+    // await fetch('https://fcm.googleapis.com/fcm/send', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization:
+    //       'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F',
+    //   },
+    //   body: JSON.stringify(message),
+    // });
+
     try {
-      console.log('inside endCall try');
       const roomRef = database().ref(`/Sellers/${id}`);
       roomRef.once('value', async snapshot => {
         if (snapshot.exists()) {
           await roomRef.update({
-            userCallStatus: 'truing',
-            sellerCallStatus: 'something',
+            userCallStatus: true,
+            sellerCallStatus: true,
           });
-          console.log('Data updated------------>', id);
         } else {
           await roomRef.set({
-            userCallStatus: 'setting tr',
-            sellerCallStatus: 'settin some',
+            userCallStatus: true,
+            sellerCallStatus: true,
           });
-          console.log('Data set------------>', id);
         }
       });
-      console.log('after endCall try');
     } catch (error) {
       console.error('Error updating data:', error);
     }
   }
+  // async function handleCallNotification(id) {
+  //   const message = {
+  //     to: roomId,
+  //     notification: {
+  //       title: '📲Fasto user Calling',
+  //       body: '📞📞Call from a fasto user📞📞',
+  //     },
+  //     data: {
+  //       channelId: `${id}`,
+  //       userUID: userUID,
+  //     },
+  //   };
+
+  //   await fetch('https://fcm.googleapis.com/fcm/send', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization:
+  //         'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F',
+  //     },
+  //     body: JSON.stringify(message),
+  //   });
+
+  //   try {
+  //     const roomRef = database().ref(`/Sellers/${id}`);
+  //     roomRef.once('value', async snapshot => {
+  //       if (snapshot.exists()) {
+  //         await roomRef.update({
+  //           userCallStatus: true,
+  //           sellerCallStatus: true,
+  //         });
+  //         console.log('Data updated------------>', id);
+  //       } else {
+  //         await roomRef.set({
+  //           userCallStatus: true,
+  //           sellerCallStatus: true,
+  //         });
+  //         console.log('Data set------------>', id);
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error('Error updating data:', error);
+  //   }
+  // }
   const startCall = async id => {
     const localPC = new RTCPeerConnection(configuration);
     localStream.getTracks().forEach(track => {
@@ -285,8 +386,6 @@ export default function CallScreen({
     localPC.onerror = error => {
       console.error('An error occurred:', error);
     };
-    console.log('seller Id in call screen -----------------', sellerId);
-    console.log('renderd ---------------------------again ----------------');
     const uniqueChannelId = uuid.v4();
     const timestamp = Date.now().toString();
     const docId = `${timestamp}_${uniqueChannelId}`;
@@ -347,7 +446,7 @@ export default function CallScreen({
       if (data) {
         if (!localPC.currentRemoteDescription && data.answer) {
           const answerDescription = new RTCSessionDescription(data.answer);
-          console.log('🚀 ~ startCall ~ answerDescription:', answerDescription);
+
           await localPC.setRemoteDescription(answerDescription);
         }
       }
@@ -406,12 +505,10 @@ export default function CallScreen({
   }, [startWebCamState]);
   useEffect(() => {
     // This effect will run whenever 'yourState' changes
-    console.log('inside handle call notificatoin useEffect');
-    if (queueIdx === 0) {
+    if (channelId) {
       handleCallNotification(channelId);
-      console.log('inside handle call notificatoin useEffect iffffff');
     }
-  }, [queueIdx]);
+  }, [channelId]);
   let allRooms = [];
   useEffect(() => {
     const fetchAllRoomsInRealTime = async () => {
@@ -435,9 +532,7 @@ export default function CallScreen({
             setQueueIdx(targetIdIndex);
 
             // Now, allRooms array contains all channelId values
-            console.log('Channel IDs:', allRooms);
-            console.log('Index of target ID:', targetIdIndex);
-            console.log('🚀 ~ WaitingQueue ~ userData:', userData.userUid);
+
             const newTime = new Date();
             newTime.setMinutes(newTime.getMinutes() + targetIdIndex * 5);
             setCurrentTime(newTime);
@@ -458,11 +553,6 @@ export default function CallScreen({
       // Clean up any event listeners or subscriptions if necessary
     };
   }, [channelId]);
-  console.log(
-    'channelIdchannelIdchannelIdchannelIdchannelIdchannelId',
-    channelId,
-  );
-  console.log('queueIndex????????????????????________???????', queueIdx);
   return (
     <>
       {queueIdx === -2 ? (
