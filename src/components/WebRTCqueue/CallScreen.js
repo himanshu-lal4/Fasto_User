@@ -25,6 +25,9 @@ import microphoneImage from '../../assets/images/microphone.png';
 import speakerOnImg from '../../assets/images/speaker.png';
 import speakerOfImg from '../../assets/images/speaker-filled-audio-tool.png';
 import InCallManager from 'react-native-incall-manager';
+import VectorIcon from '../../assets/VectorIcon/VectorIcon';
+import {COLORS, FONTS} from '../../assets/theme';
+
 const configuration = {
   iceServers: [
     {
@@ -289,35 +292,65 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
       </View>
       <View style={{flexDirection: 'row'}}>
         <View style={styles.toggleButtons}>
-          <TouchableOpacity>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={require('../../assets/images/chat.png')}
+          <TouchableOpacity style={styles.buttons}>
+            <VectorIcon
+              name={'message'}
+              type={'Entypo'}
+              size={30}
+              color={COLORS.white}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={toggleSpeaker}>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={speakerOn ? speakerOfImg : speakerOnImg}
+          <TouchableOpacity style={styles.buttons} onPress={toggleSpeaker}>
+            {speakerOn ? (
+              <VectorIcon
+                name={'volume-mute'}
+                type={'Ionicons'}
+                size={30}
+                color={COLORS.white}
+              />
+            ) : (
+              <VectorIcon
+                name={'volume-up'}
+                type={'FontAwesome'}
+                size={30}
+                color={COLORS.white}
+              />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buttons} onPress={switchCamera}>
+            <VectorIcon
+              name={'camera-reverse'}
+              type={'Ionicons'}
+              size={30}
+              color={COLORS.white}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={switchCamera}>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={require('../../assets/images/switch-camera.png')}
-            />
+          <TouchableOpacity style={styles.buttons} onPress={toggleMute}>
+            {isMuted ? (
+              <VectorIcon
+                name={'microphone-off'}
+                type={'MaterialCommunityIcons'}
+                size={30}
+                color={COLORS.white}
+              />
+            ) : (
+              <VectorIcon
+                name={'microphone'}
+                type={'MaterialCommunityIcons'}
+                size={30}
+                color={COLORS.white}
+              />
+            )}
           </TouchableOpacity>
-          <TouchableOpacity onPress={toggleMute}>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={isMuted ? muteMicrophoneImage : microphoneImage}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => onBackPress(channelId)}>
-            <Image
-              style={{width: 40, height: 40, marginTop: 4}}
-              source={require('../../assets/images/phone-call-end.png')}
+          <TouchableOpacity
+            style={styles.buttons}
+            onPress={() => onBackPress(channelId)}>
+            <VectorIcon
+              name={'phone-hangup'}
+              type={'MaterialCommunityIcons'}
+              size={30}
+              color={COLORS.white}
             />
           </TouchableOpacity>
         </View>
@@ -335,18 +368,23 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     flex: 1,
-    borderRadius: 30,
+    borderRadius: 15,
     overflow: 'hidden',
     objectFit: 'cover',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   rtc: {
     width: '100%',
     height: '100%',
     flex: 1,
-    borderRadius: 18,
+    borderRadius: 15,
     overflow: 'hidden',
     objectFit: 'cover',
+  },
+  buttons: {
+    padding: '2%',
+    borderRadius: 50,
+    backgroundColor: COLORS.darkBlue,
   },
   toggleButtons: {
     width: '100%',

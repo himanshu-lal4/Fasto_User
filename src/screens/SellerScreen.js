@@ -26,6 +26,7 @@ import database from '@react-native-firebase/database';
 import {Dimensions} from 'react-native';
 import {ScrollView} from 'react-native-virtualized-view';
 import {Shadow} from 'react-native-shadow-2';
+import LinearGradient from 'react-native-linear-gradient';
 
 const {width, height} = Dimensions.get('window');
 
@@ -332,91 +333,100 @@ const SellerScreen = () => {
           setModalVisible(false);
         }}>
         <View style={styles.modalContainer}>
-          <Shadow
-            distance={6}
-            stretch={false}
-            // offset={[0, 0]}
-            style={styles.actions}
-            startColor={COLORS.white1}
-            endColor={COLORS.white}>
-            {/* <View style={styles.actions}> */}
-            <TouchableOpacity
-              style={styles.button}
-              onPress={async () => {
-                console.log('Calling action');
-                // handleCallNotification();
-                // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
-                handleCallNotification();
-                navigation.navigate('WebRTCIndex', {
-                  clickedSellerDeviceToken,
-                });
-                // navigation.navigate('WebRTCIndex');
-                setModalVisible(false);
-              }}>
-              <VectorIcon
-                name={'video'}
-                type={'Feather'}
-                size={25}
-                color={COLORS.gray}
-              />
-            </TouchableOpacity>
+          <LinearGradient
+            colors={['transparent', COLORS.white, COLORS.white]}
+            style={styles.gradient}>
+            <Shadow
+              distance={4}
+              stretch={false}
+              // offset={[0, 0]}
+              style={styles.actions}
+              startColor={'#f1f1f1'}
+              endColor={COLORS.white}>
+              {/* <View style={styles.actions}> */}
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => {
+                  console.log('Calling action');
+                  // handleCallNotification();
+                  // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
+                  handleCallNotification();
+                  navigation.navigate('WebRTCIndex', {
+                    clickedSellerDeviceToken,
+                  });
+                  // navigation.navigate('WebRTCIndex');
+                  setModalVisible(false);
+                }}>
+                <VectorIcon
+                  name={'video'}
+                  type={'Feather'}
+                  size={25}
+                  color={COLORS.gray}
+                />
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                console.log('Messaging action');
-                setModalVisible(false);
-              }}>
-              <VectorIcon
-                name={'android-messages'}
-                type={'MaterialCommunityIcons'}
-                size={25}
-                color={COLORS.gray}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={async () => {
-                console.log('Calling action');
-                // handleCallNotification();
-                // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
-                handleCallNotification();
-                navigation.navigate('WebRTCIndex', {
-                  clickedSellerDeviceToken,
-                });
-                // navigation.navigate('WebRTCIndex');
-                setModalVisible(false);
-              }}>
-              <VectorIcon
-                name={'call'}
-                type={'Ionicons'}
-                size={25}
-                color={COLORS.gray}
-              />
-            </TouchableOpacity>
-          </Shadow>
-          <Shadow
-            distance={6}
-            stretch={false}
-            style={{
-              justifyContent: 'center',
-              borderRadius: 50,
-              width: 62,
-              height: 62,
-            }}
-            startColor={COLORS.white1}
-            endColor={COLORS.white}>
-            <TouchableOpacity
-              style={{alignSelf: 'center', paddingVertical: '8%'}}
-              onPress={() => setModalVisible(false)}>
-              <VectorIcon
-                name={'cross'}
-                type={'Entypo'}
-                size={30}
-                color={'red'}
-              />
-            </TouchableOpacity>
-          </Shadow>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  console.log('Messaging action');
+                  setModalVisible(false);
+                }}>
+                <VectorIcon
+                  name={'android-messages'}
+                  type={'MaterialCommunityIcons'}
+                  size={25}
+                  color={COLORS.gray}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => {
+                  console.log('Calling action');
+                  // handleCallNotification();
+                  // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
+                  handleCallNotification();
+                  navigation.navigate('WebRTCIndex', {
+                    clickedSellerDeviceToken,
+                  });
+                  // navigation.navigate('WebRTCIndex');
+                  setModalVisible(false);
+                }}>
+                <VectorIcon
+                  name={'call'}
+                  type={'Ionicons'}
+                  size={25}
+                  color={COLORS.gray}
+                />
+              </TouchableOpacity>
+            </Shadow>
+            <Shadow
+              distance={4}
+              stretch={false}
+              style={{
+                justifyContent: 'center',
+                borderRadius: 50,
+                width: 62,
+                height: 62,
+                backgroundColor: COLORS.white,
+              }}
+              startColor={'#f1f1f1'}
+              endColor={COLORS.white}>
+              <TouchableOpacity
+                style={{
+                  alignSelf: 'center',
+                  paddingVertical: '8%',
+                  backgroundColor: COLORS.white,
+                }}
+                onPress={() => setModalVisible(false)}>
+                <VectorIcon
+                  name={'cross'}
+                  type={'Entypo'}
+                  size={30}
+                  color={'red'}
+                />
+              </TouchableOpacity>
+            </Shadow>
+          </LinearGradient>
         </View>
       </Modal>
     </SafeAreaView>
@@ -558,24 +568,30 @@ const styles = StyleSheet.create({
   modalContainer: {
     position: 'absolute',
     bottom: 0,
+    zIndex: 2,
     width: '100%',
-    height: '12%',
+    height: '11%',
+  },
+  gradient: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    width: width,
+    height: '100%',
     paddingHorizontal: '12%',
-    borderColor: 'green',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
   button: {
-    paddingHorizontal: '10%',
+    paddingHorizontal: '8%',
   },
   actions: {
     borderRadius: 50,
-    paddingVertical: '8%',
+    // paddingVertical: '6%',
     flexDirection: 'row',
     width: 210,
     height: 62,
     justifyContent: 'space-evenly',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
   },
   loader: {
     // borderWidth: 3,

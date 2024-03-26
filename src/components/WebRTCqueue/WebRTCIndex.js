@@ -8,6 +8,7 @@ import {
 import RoomScreen from './RoomScreen';
 import CallScreen from './CallScreen';
 import JoinScreen from './JoinScreen';
+import {COLORS} from '../../assets/theme';
 
 export default function WebRTCIndex({route, navigation}) {
   const {clickedSellerDeviceToken} = route.params;
@@ -67,5 +68,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    backgroundColor: COLORS.white,
   },
 });
