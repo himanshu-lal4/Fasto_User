@@ -27,6 +27,8 @@ import speakerOfImg from '../../assets/images/speaker-filled-audio-tool.png';
 import InCallManager from 'react-native-incall-manager';
 import VectorIcon from '../../assets/VectorIcon/VectorIcon';
 import {COLORS, FONTS} from '../../assets/theme';
+import {Dimensions} from 'react-native';
+const {width, height} = Dimensions.get('window');
 
 const configuration = {
   iceServers: [
@@ -267,28 +269,32 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
   }, [startWebCamState]);
   return (
     <>
-      {/* <Text style={styles.heading}>Join Screen</Text> */}
-      {/* <Text style={styles.heading}>Room : {roomId}</Text> */}
-
-      {/* <View style={styles.callButtons}> */}
-
       <View style={{display: 'flex', flex: 1}}>
-        <View style={styles.rtcview}>
+        <View style={styles.localStream}>
           {localStream && (
-            <RTCView
-              style={styles.rtc}
-              streamURL={localStream && localStream.toURL()}
-            />
+            <View style={styles.localStream}>
+              <RTCView
+                style={styles.rtc}
+                streamURL={localStream && localStream.toURL()}
+              />
+            </View>
           )}
         </View>
-        {remoteStream && (
-          <View style={styles.rtcview}>
-            <RTCView
-              style={styles.rtc}
-              streamURL={remoteStream && remoteStream.toURL()}
-            />
+        <Text style={styles.text}>Session with Joseph Parker</Text>
+        {/* {remoteStream && ( */}
+        <View style={styles.remoteStream}>
+          <RTCView
+            style={styles.rtc}
+            streamURL={remoteStream && remoteStream.toURL()}
+          />
+          <View style={styles.textContainer}>
+            <Text style={{position: 'absolute', zIndex: 10}}>
+              Salma Hellman
+            </Text>
+            <Text>Broadcast Organizer </Text>
           </View>
-        )}
+        </View>
+        {/* )} */}
       </View>
       <View style={{flexDirection: 'row'}}>
         <View style={styles.toggleButtons}>
@@ -308,6 +314,7 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
                 type={'Ionicons'}
                 size={30}
                 color={COLORS.white}
+                style={styles.clickedButtons}
               />
             ) : (
               <VectorIcon
@@ -332,7 +339,7 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
                 name={'microphone-off'}
                 type={'MaterialCommunityIcons'}
                 size={30}
-                color={COLORS.white}
+                style={styles.clickedButtons}
               />
             ) : (
               <VectorIcon
@@ -364,32 +371,70 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: 30,
   },
-  rtcview: {
-    width: '100%',
-    height: '100%',
-    flex: 1,
-    borderRadius: 15,
-    overflow: 'hidden',
-    objectFit: 'cover',
-    marginBottom: 10,
-  },
   rtc: {
     width: '100%',
     height: '100%',
-    flex: 1,
-    borderRadius: 15,
+    borderRadius: 50,
+    backgroundColor: 'transparent',
     overflow: 'hidden',
     objectFit: 'cover',
   },
-  buttons: {
-    padding: '2%',
+  text: {
+    ...FONTS.h1,
+    color: COLORS.white,
+    position: 'absolute',
+    top: 30,
+    marginHorizontal: 25,
+    marginVertical: 30,
+    paddingVertical: '2%',
+  },
+  smallText: {
+    ...FONTS.body3,
+    color: COLORS.white,
+    position: 'absolute',
+    top: 80,
+    marginHorizontal: 25,
+    marginVertical: 30,
+    zIndex: 20,
+  },
+  remoteStream: {
+    position: 'relative',
+    height: height * 0.88,
+    width: '100%',
+    borderBottomRightRadius: 30,
+    borderBottomLeftRadius: 30,
+    overflow: 'hidden',
+    zIndex: -1,
+    flexDirection: 'row',
+  },
+  localStream: {
+    position: 'absolute',
+    top: 60,
+    width: '40%',
+    margin: '5%',
+    zIndex: 10,
+    height: height * 0.15,
     borderRadius: 50,
-    backgroundColor: COLORS.darkBlue,
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+  },
+  clickedButtons: {
+    // padding: '4%',
+    alignItems: 'center',
+    backgroundColor: COLORS.gray,
+    borderRadius: 50,
+  },
+  buttons: {
+    padding: '4%',
+    borderRadius: 50,
+    backgroundColor: COLORS.gray,
   },
   toggleButtons: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
+    position: 'absolute',
+    bottom: 110,
   },
   callButtons: {
     padding: 10,

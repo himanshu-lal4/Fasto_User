@@ -22,7 +22,7 @@ import CommonHeader from '../components/Common/CommonHeader';
 import {PermissionsAndroid} from 'react-native';
 import StartWebCam from '../components/WebRTC/StartWebCam';
 import {StartCall, startCall} from '../components/WebRTC/StartCall';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 import {Dimensions} from 'react-native';
 import {ScrollView} from 'react-native-virtualized-view';
 import {Shadow} from 'react-native-shadow-2';
@@ -39,8 +39,10 @@ const SellerScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const spinValue = useRef(new Animated.Value(0)).current;
   const shakeValue = new Animated.Value(0);
+  const [clickedImageId, setClickedImageId] = useState(null);
   const [clickedSellerDeviceToken, setClickedSellerDeviceToken] =
     useState(null);
+  const position = useRef(new Animated.Value(50)).current;
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -64,7 +66,7 @@ const SellerScreen = () => {
       console.warn(err);
     }
   };
-
+  console.log('clickedSeller', clickedSeller);
   const handlePress = () => {
     requestCameraPermission();
   };
@@ -155,6 +157,21 @@ const SellerScreen = () => {
     // }
   }, []);
 
+  const slideModal = toValue => {
+    Animated.timing(position, {
+      toValue: toValue, // Update toValue directly
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  useEffect(() => {
+    if (modalVisible) {
+      slideModal(0); // Slide up when modal is visible
+      console.log('MODAAAAAAAAAAL', modalVisible);
+    }
+  }, [modalVisible]);
+
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
@@ -177,6 +194,7 @@ const SellerScreen = () => {
           // console.log('Seller Data:', sellerData.deviceToken);
           // sellerFcmToken = sellerData.deviceToken;
           setClickedSellerDeviceToken(sellerData.deviceToken);
+          // setClickedSeller(true);
         } else {
           console.log('No such document 147!');
         }
@@ -213,11 +231,16 @@ const SellerScreen = () => {
         onPress={() => {
           // setClickedSeller(item.id);
           console.log('itemId---------->', item.id);
+          setClickedImageId(item.id);
           setDeviceToken(item.id);
           setModalVisible(true);
         }}>
         <Animated.View
-          style={[styles.imgContainer, {transform: [{rotate: shake}]}]}>
+          style={[
+            styles.imgContainer,
+            clickedImageId === item.id && styles.highlightedImage,
+            {transform: [{rotate: shake}]},
+          ]}>
           {isLoading && (
             <Animated.View
               style={[styles.loader, {transform: [{rotate: spin}]}]}>
@@ -230,16 +253,6 @@ const SellerScreen = () => {
             onLoad={handleImageLoad}
           />
         </Animated.View>
-        {/* <Image
-          style={styles.img}
-          source={{uri: item.data.imageUrl}}
-          onLoad={handleImageLoad}
-        />
-        <View style={styles.spinnerContainer}>
-          <Animated.View
-            style={[styles.loader, {transform: [{rotate: spin}]}]}
-          />
-        </View> */}
         <Text style={[FONTS.body3, styles.text]}>{item.data.name}</Text>
       </TouchableOpacity>
     );
@@ -326,13 +339,18 @@ const SellerScreen = () => {
         </View>
       </ScrollView>
       <Modal
-        // animationType="slide"
+        animationType="none"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(false);
+          slideModal(50);
         }}>
-        <View style={styles.modalContainer}>
+        <Animated.View
+          style={[
+            styles.modalContainer,
+            {transform: [{translateY: position}]},
+          ]}>
           <LinearGradient
             colors={['transparent', COLORS.white, COLORS.white]}
             style={styles.gradient}>
@@ -343,7 +361,6 @@ const SellerScreen = () => {
               style={styles.actions}
               startColor={'#f1f1f1'}
               endColor={COLORS.white}>
-              {/* <View style={styles.actions}> */}
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {
@@ -356,6 +373,7 @@ const SellerScreen = () => {
                   });
                   // navigation.navigate('WebRTCIndex');
                   setModalVisible(false);
+                  setClickedImageId(null);
                 }}>
                 <VectorIcon
                   name={'video'}
@@ -417,7 +435,10 @@ const SellerScreen = () => {
                   paddingVertical: '8%',
                   backgroundColor: COLORS.white,
                 }}
-                onPress={() => setModalVisible(false)}>
+                onPress={() => {
+                  setModalVisible(false);
+                  setClickedImageId(null);
+                }}>
                 <VectorIcon
                   name={'cross'}
                   type={'Entypo'}
@@ -427,7 +448,7 @@ const SellerScreen = () => {
               </TouchableOpacity>
             </Shadow>
           </LinearGradient>
-        </View>
+        </Animated.View>
       </Modal>
     </SafeAreaView>
   );
@@ -540,7 +561,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     color: COLORS.black,
   },
-  img: {width: '100%', height: '100%'},
+  img: {width: '100%', height: '100%', borderRadius: 45},
+  highlightedImage: {
+    borderWidth: 2.5,
+    borderColor: COLORS.black,
+  },
   iconOpacity: {opacity: 0.5},
   addIconContainer: {
     width: 80,
@@ -594,13 +619,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   loader: {
-    // borderWidth: 3,
-    // borderColor: 'red',
-    // borderRadius: 50,
-    // width: '100%',
-    // height: '100%',
-    // justifyContent: 'center',
-    // alignItems: 'center',
     height: 80,
     width: 80,
     borderRadius: 50,
@@ -621,269 +639,3 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
 });
-
-//   return (
-//     <View style={styles.container}>
-//       <TouchableWithoutFeedback onPress={() => console.log('Image clicked')}>
-//         <Animated.View style={[styles.imageContainer, { transform: [{ rotate: shake }] }]}>
-//           {isLoading && (
-//             <Animated.View style={[styles.loader, { transform: [{ rotate: spin }] }]}>
-//               <View style={styles.loaderInner} />
-//             </Animated.View>
-//           )}
-//           <Image
-//             source={{ uri: 'your_image_url_here' }}
-//             style={styles.image}
-//             onLoad={handleImageLoad}
-//           />
-//         </Animated.View>
-//       </TouchableWithoutFeedback>
-//     </View>
-//   );
-// };
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   imageContainer: {
-//     position: 'relative',
-//   },
-//   loader: {
-//     position: 'absolute',
-//     borderWidth: 2,
-//     borderColor: 'rgba(255,255,255,0.4)',
-//     borderRadius: 10,
-//     width: '100%',
-//     height: '100%',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   loaderInner: {
-//     width: 20,
-//     height: 20,
-//     borderRadius: 10,
-//     backgroundColor: 'rgba(255,255,255,0.4)',
-//   },
-//   image: {
-//     width: 200,
-//     height: 200,
-//     borderRadius: 10,
-//   },
-// });
-
-{
-  /* <View style={styles.textInputContainer}>
-        <VectorIcon
-          name="search"
-          color={COLORS.darkBlue}
-          size={25}
-          style={styles.iconOpacity}
-        />
-        <TextInput style={styles.textInput} placeholder="Search..." />
-      </View> */
-}
-
-// const sellerFcmToken =
-//   'emeV5Te3QWeotU0S4Vx_WR:APA91bEQdEaRk6oUpzE35aa9Zw_PmMwUp6QdPvKLgxMproXA3XcZy8BLLusL0FCHX8XjINivdt7-gaa5NActmUMmEltB4IH9qSDROdxgcU6ITf1_iDBrZV2XOzsU75lTFCdgWv2ylqfw'; // Replace with the actual seller's FCM token
-
-// const message = {
-//   to: sellerFcmToken,
-//   notification: {
-//     title: 'User App Notification',
-//     body: 'This is a notification from the user app to the seller app.',
-//   },
-//   data: {
-//     // You can include additional data if needed
-//     // ...
-//   },
-// };
-
-// async function handleCallNotification() {
-//   console.log('<==========handleCallNotification==========>');
-//   console.log('clickedSellerDeviceToken--->', clickedSellerDeviceToken);
-
-//   const message = {
-//     to: clickedSellerDeviceToken,
-//     notification: {
-//       title: '📲Fasto user Calling',
-//       body: '📞📞Call from a fasto user📞📞',
-//     },
-//     data: {
-//       // You can include additional data if needed
-//       // ...
-//     },
-//   };
-//   console.log(
-//     'handleCallNotificationClickedSellerDeviceToken----------->',
-//     clickedSellerDeviceToken,
-//   );
-//   await fetch('https://fcm.googleapis.com/fcm/send', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization:
-//         'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
-//     },
-//     body: JSON.stringify(message),
-//   });
-// }
-
-// const message = {
-//   to: clickedSellerDeviceToken,
-//   notification: {
-//     title: '📲Fasto user Calling',
-//     body: '📞📞Call from a fasto user📞📞',
-//   },
-//   data: {
-//     // You can include additional data if needed
-//     // ...
-//     channelId: channelId,
-//   },
-// };
-// console.log('clickedSellerDeviceToken', clickedSellerDeviceToken);
-// const message = {
-//   to: clickedSellerDeviceToken,
-//   notification: {
-//     title: '📲Fasto user Calling',
-//     body: '📞📞Call from a fasto user📞📞',
-//   },
-//   data: {
-//     channelId: `${clickedSellerDeviceToken}`,
-//     userUID: userUID,
-//     // Add more key-value pairs as needed
-//   },
-// };
-// await fetch('https://fcm.googleapis.com/fcm/send', {
-//   method: 'POST',
-//   headers: {
-//     'Content-Type': 'application/json',
-//     Authorization:
-//       'key=AAAArsiGfCg:APA91bG4MQ_kSTeuCFZDjEkStvHn_zBJ_WmyTLzUg9C7sPmy3THk7s8XnoyhSjrhZ6X_X7VRGPpO_yCFXJ2AYYUEPUWoPV6Lm7jZ28BQ4mQKeoDM8SsrgnE73VdfelwDG9S9ywP5La8F', // Replace with your server key
-//   },
-//   body: JSON.stringify(message),
-// });
-// try {
-//   console.log('inside endCall try');
-//   const roomRef = database().ref(`/Sellers/${clickedSellerDeviceToken}`);
-//   // Check if the room already exists
-//   roomRef.once('value', async snapshot => {
-//     if (snapshot.exists()) {
-//       // If room exists, update its data
-//       await roomRef.update({
-//         userCallStatus: 'truing',
-//         sellerCallStatus: 'something',
-//       });
-//       console.log('Data updated------------>', clickedSellerDeviceToken);
-//     } else {
-//       // If room doesn't exist, set its data
-//       await roomRef.set({
-//         userCallStatus: 'setting tr',
-//         sellerCallStatus: 'settin some',
-//       });
-//       console.log('Data set------------>', clickedSellerDeviceToken);
-//     }
-//   });
-//   console.log('after endCall try');
-// } catch (error) {
-//   console.error('Error updating data:', error);
-// }
-
-// import React, { useState, useEffect } from 'react';
-// import { View, Image, TouchableWithoutFeedback, Animated, Easing, StyleSheet } from 'react-native';
-
-// const ImageLoader = () => {
-//   const [isLoading, setIsLoading] = useState(true);
-//   const spinValue = new Animated.Value(0);
-//   const shakeValue = new Animated.Value(0);
-
-//   useEffect(() => {
-//     if (isLoading) {
-//       Animated.loop(
-//         Animated.timing(
-//           spinValue,
-//           {
-//             toValue: 1,
-//             duration: 1500,
-//             easing: Easing.linear,
-//             useNativeDriver: true,
-//           }
-//         )
-//       ).start();
-//     } else {
-//       Animated.sequence([
-//         Animated.timing(shakeValue, { toValue: 10, duration: 100, useNativeDriver: true }),
-//         Animated.timing(shakeValue, { toValue: -10, duration: 100, useNativeDriver: true }),
-//         Animated.timing(shakeValue, { toValue: 0, duration: 100, useNativeDriver: true }),
-//       ]).start();
-//     }
-//   }, [isLoading]);
-
-//   const spin = spinValue.interpolate({
-//     inputRange: [0, 1],
-//     outputRange: ['0deg', '360deg']
-//   });
-
-//   const shake = shakeValue.interpolate({
-//     inputRange: [-10, 10],
-//     outputRange: ['-10deg', '10deg']
-//   });
-
-//   const handleImageLoad = () => {
-//     setIsLoading(false);
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <TouchableWithoutFeedback onPress={() => console.log('Image clicked')}>
-//         <Animated.View style={[styles.imageContainer, { transform: [{ rotate: shake }] }]}>
-//           {isLoading && (
-//             <Animated.View style={[styles.loader, { transform: [{ rotate: spin }] }]}>
-//               <View style={styles.loaderInner} />
-//             </Animated.View>
-//           )}
-//           <Image
-//             source={{ uri: 'your_image_url_here' }}
-//             style={styles.image}
-//             onLoad={handleImageLoad}
-//           />
-//         </Animated.View>
-//       </TouchableWithoutFeedback>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   imageContainer: {
-//     position: 'relative',
-//   },
-//   loader: {
-//     position: 'absolute',
-//     borderWidth: 2,
-//     borderColor: 'rgba(255,255,255,0.4)',
-//     borderRadius: 10,
-//     width: '100%',
-//     height: '100%',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   loaderInner: {
-//     width: 20,
-//     height: 20,
-//     borderRadius: 10,
-//     backgroundColor: 'rgba(255,255,255,0.4)',
-//   },
-//   image: {
-//     width: 200,
-//     height: 200,
-//     borderRadius: 10,
-//   },
-// });
-
-// export default ImageLoader;
