@@ -270,29 +270,58 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
   return (
     <>
       <View style={{display: 'flex', flex: 1}}>
-        <View style={styles.localStream}>
+        <Text style={styles.text}>Session with Joseph Parker</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            position: 'absolute',
+            marginTop: '35%',
+            marginHorizontal: '7%',
+          }}>
           {localStream && (
             <View style={styles.localStream}>
               <RTCView
-                style={styles.rtc}
+                style={{
+                  width: width * 0.2,
+                  height: height * 0.2,
+                  objectFit: 'contain',
+                }}
                 streamURL={localStream && localStream.toURL()}
               />
+              <View style={{marginHorizontal: 20, marginVertical: 5}}>
+                <Text
+                  style={{
+                    color: COLORS.white,
+                  }}>
+                  Salma Hellman
+                </Text>
+                <Text
+                  style={{
+                    color: COLORS.white,
+                  }}>
+                  Broadcast Organizer
+                </Text>
+              </View>
             </View>
           )}
+          <View
+            style={{
+              backgroundColor: 'red',
+              height: height * 0.05,
+              width: width * 0.2,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 30,
+            }}>
+            <Text style={{color: COLORS.white}}>&#x2022; Live</Text>
+          </View>
         </View>
-        <Text style={styles.text}>Session with Joseph Parker</Text>
         {/* {remoteStream && ( */}
         <View style={styles.remoteStream}>
           <RTCView
             style={styles.rtc}
             streamURL={remoteStream && remoteStream.toURL()}
           />
-          <View style={styles.textContainer}>
-            <Text style={{position: 'absolute', zIndex: 10}}>
-              Salma Hellman
-            </Text>
-            <Text>Broadcast Organizer </Text>
-          </View>
         </View>
         {/* )} */}
       </View>
@@ -351,11 +380,11 @@ export default function CallScreen({setScreen, screens, roomId, navigation}) {
             )}
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.buttons}
+            style={[styles.buttons, {backgroundColor: 'red'}]}
             onPress={() => onBackPress(channelId)}>
             <VectorIcon
-              name={'phone-hangup'}
-              type={'MaterialCommunityIcons'}
+              name={'cross'}
+              type={'Entypo'}
               size={30}
               color={COLORS.white}
             />
@@ -374,9 +403,6 @@ const styles = StyleSheet.create({
   rtc: {
     width: '100%',
     height: '100%',
-    borderRadius: 50,
-    backgroundColor: 'transparent',
-    overflow: 'hidden',
     objectFit: 'cover',
   },
   text: {
@@ -388,17 +414,8 @@ const styles = StyleSheet.create({
     marginVertical: 30,
     paddingVertical: '2%',
   },
-  smallText: {
-    ...FONTS.body3,
-    color: COLORS.white,
-    position: 'absolute',
-    top: 80,
-    marginHorizontal: 25,
-    marginVertical: 30,
-    zIndex: 20,
-  },
   remoteStream: {
-    position: 'relative',
+    position: 'absolute',
     height: height * 0.88,
     width: '100%',
     borderBottomRightRadius: 30,
@@ -408,15 +425,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   localStream: {
-    position: 'absolute',
-    top: 60,
-    width: '40%',
-    margin: '5%',
-    zIndex: 10,
-    height: height * 0.15,
-    borderRadius: 50,
-    overflow: 'hidden',
-    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    // justifyContent: 'space-around',
   },
   clickedButtons: {
     // padding: '4%',

@@ -157,9 +157,9 @@ const SellerScreen = () => {
     // }
   }, []);
 
-  const slideModal = toValue => {
+  const slideModal = () => {
     Animated.timing(position, {
-      toValue: toValue, // Update toValue directly
+      toValue: 0, // Update toValue directly
       duration: 200,
       useNativeDriver: true,
     }).start();
@@ -168,7 +168,12 @@ const SellerScreen = () => {
   useEffect(() => {
     if (modalVisible) {
       slideModal(0); // Slide up when modal is visible
-      console.log('MODAAAAAAAAAAL', modalVisible);
+    } else {
+      Animated.timing(position, {
+        toValue: 50, // Update toValue directly
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
     }
   }, [modalVisible]);
 
@@ -342,9 +347,10 @@ const SellerScreen = () => {
         animationType="none"
         transparent={true}
         visible={modalVisible}
+        style={[styles.modalContainer, {transform: [{translateY: position}]}]}
         onRequestClose={() => {
           setModalVisible(false);
-          slideModal(50);
+          // slideModal(50);
         }}>
         <Animated.View
           style={[
