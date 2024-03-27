@@ -263,8 +263,8 @@ export default function CallScreen({
       const message = {
         to: roomId,
         notification: {
-          title: 'Another user Calling',
-          body: 'The user is waiting in the queue.',
+          title: `${userData.name} Calling`,
+          body: `${userData.name} is waiting in the queue`,
         },
         data: {
           channelId: `${id}`,
