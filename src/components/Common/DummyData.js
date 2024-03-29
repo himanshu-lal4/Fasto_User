@@ -1,0 +1,80 @@
+export const DummyData = [
+  {
+    'Product Name': 'Milk',
+    Category: 'Dairy',
+    Price: 2.99,
+    Description: "Fresh cow's milk.",
+  },
+  {
+    'Product Name': 'Cheese',
+    Category: 'Dairy',
+    Price: 4.5,
+    Description: 'Aged cheddar cheese.',
+  },
+  {
+    'Product Name': 'Eggs',
+    Category: 'Dairy',
+    Price: 2.0,
+    Description: 'Farm-fresh large eggs.',
+  },
+  {
+    'Product Name': 'Yogurt',
+    Category: 'Dairy',
+    Price: 3.25,
+    Description: 'Creamy Greek yogurt.',
+  },
+  {
+    'Product Name': 'Bread',
+    Category: 'Grocery',
+    Price: 1.99,
+    Description: 'Whole wheat sandwich bread.',
+  },
+  {
+    'Product Name': 'Butter',
+    Category: 'Dairy',
+    Price: 2.75,
+    Description: 'Salted creamy butter.',
+  },
+  {
+    'Product Name': 'Apples',
+    Category: 'Grocery',
+    Price: 0.75,
+    Description: 'Crisp red apples.',
+  },
+  {
+    'Product Name': 'Bananas',
+    Category: 'Grocery',
+    Price: 0.6,
+    Description: 'Ripe yellow bananas.',
+  },
+  {
+    'Product Name': 'Spinach',
+    Category: 'Grocery',
+    Price: 1.5,
+    Description: 'Fresh baby spinach leaves.',
+  },
+  {
+    'Product Name': 'Tomatoes',
+    Category: 'Grocery',
+    Price: 0.9,
+    Description: 'Juicy vine-ripened tomatoes.',
+  },
+  {
+    'Product Name': 'Cereal',
+    Category: 'Grocery',
+    Price: 3.99,
+    Description: 'Crunchy whole grain cereal.',
+  },
+  {
+    'Product Name': 'Ice Cream',
+    Category: 'Dairy',
+    Price: 5.5,
+    Description: 'Creamy vanilla ice cream.',
+  },
+  {
+    'Product Name': 'Orange Juice',
+    Category: 'Grocery',
+    Price: 2.25,
+    Description: 'Freshly squeezed orange juice.',
+  },
+];

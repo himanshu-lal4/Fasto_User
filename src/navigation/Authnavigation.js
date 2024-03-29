@@ -91,7 +91,7 @@ const Authnavigation = () => {
         screenOptions={{
           headerShown: false,
         }}
-        // initialRouteName="WaitingQueue"
+        // initialRouteName="MessagingScreen"
       >
         {user ? (
           <>
