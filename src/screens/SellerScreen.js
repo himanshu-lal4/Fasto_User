@@ -163,7 +163,7 @@ const SellerScreen = () => {
   const slideModal = () => {
     Animated.timing(position, {
       toValue: 0, // Update toValue directly
-      duration: 200,
+      duration: 1000,
       useNativeDriver: true,
     }).start();
   };
@@ -174,7 +174,7 @@ const SellerScreen = () => {
     } else {
       Animated.timing(position, {
         toValue: 50, // Update toValue directly
-        duration: 200,
+        duration: 1000,
         useNativeDriver: true,
       }).start();
     }
@@ -358,7 +358,6 @@ const SellerScreen = () => {
         style={[styles.modalContainer, {transform: [{translateY: position}]}]}
         onRequestClose={() => {
           setModalVisible(false);
-          // slideModal(50);
         }}>
         <Animated.View
           style={[
@@ -398,11 +397,10 @@ const SellerScreen = () => {
                   color={COLORS.gray}
                 />
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => {
-                  console.log('Messaging action');
+                onPress={async () => {
+                  navigation.navigate('MessagingScreen');
                   setModalVisible(false);
                 }}>
                 <VectorIcon

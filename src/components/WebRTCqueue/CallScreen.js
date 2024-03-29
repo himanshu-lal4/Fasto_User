@@ -638,7 +638,7 @@ export default function CallScreen({
               <TouchableOpacity style={styles.buttons}>
                 <VectorIcon
                   name={'message'}
-                  type={'Entypo'}
+                  type={'FontAwesome6'}
                   size={30}
                   color={COLORS.white}
                 />
@@ -691,8 +691,8 @@ export default function CallScreen({
                 style={[styles.buttons, {backgroundColor: 'red'}]}
                 onPress={() => onBackPress(channelId)}>
                 <VectorIcon
-                  name={'cross'}
-                  type={'Entypo'}
+                  name={'close'}
+                  type={'AntDesign'}
                   size={30}
                   color={COLORS.white}
                 />
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
   buttons: {
     padding: '4%',
     borderRadius: 50,
-    backgroundColor: COLORS.gray,
+    backgroundColor: '#12131e',
   },
   toggleButtons: {
     width: '100%',

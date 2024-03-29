@@ -15,7 +15,7 @@ import {Dimensions} from 'react-native';
 import {Swipeable} from 'react-native-gesture-handler';
 const {width, height} = Dimensions.get('window');
 
-const MessagingScreen = () => {
+const MessagingScreen = ({navigation}) => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [data, setData] = useState();
 
@@ -98,6 +98,7 @@ const MessagingScreen = () => {
             size={25}
             color={COLORS.white}
             style={styles.headerIcon}
+            onPress={navigation.goBack()}
           />
         </View>
         <View style={styles.progressBarContainer}>
