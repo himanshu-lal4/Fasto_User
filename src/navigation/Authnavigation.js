@@ -24,6 +24,8 @@ import {addUserData} from '../redux/userDataSlice';
 import firestore from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
 import WaitingQueue from '../screens/WaitingQueue';
+import MessagingScreen from '../screens/MessagingScreen';
+
 const Stack = createStackNavigator();
 
 // ... (previous imports)
@@ -84,7 +86,7 @@ const Authnavigation = () => {
 
   return (
     <>
-      <StatusBar barStyle={'light-content'} backgroundColor={COLORS.darkBlue} />
+      <StatusBar barStyle={'dark-content'} backgroundColor={COLORS.white} />
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -100,6 +102,7 @@ const Authnavigation = () => {
             <Stack.Screen name="WaitingQueue" component={WaitingQueue} />
             <Stack.Screen name="WebRTCIndex" component={WebRTCIndex} />
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
+            <Stack.Screen name="Message" component={MessagingScreen} />
           </>
         ) : (
           <>

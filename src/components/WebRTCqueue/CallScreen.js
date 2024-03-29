@@ -23,11 +23,17 @@ import database from '@react-native-firebase/database';
 import {useSelector} from 'react-redux';
 import muteMicrophoneImage from '../../assets/images/mute-microphone.png';
 import microphoneImage from '../../assets/images/microphone.png';
-import InCallManager from 'react-native-incall-manager';
 import speakerOnImg from '../../assets/images/speaker.png';
 import speakerOfImg from '../../assets/images/speaker-filled-audio-tool.png';
+import InCallManager from 'react-native-incall-manager';
+
 import uuid from 'react-native-uuid';
 import WaitingQueue from '../../screens/WaitingQueue';
+import VectorIcon from '../../assets/VectorIcon/VectorIcon';
+import {COLORS, FONTS} from '../../assets/theme';
+import {Dimensions} from 'react-native';
+const {width, height} = Dimensions.get('window');
+
 const configuration = {
   iceServers: [
     {
@@ -40,7 +46,7 @@ const configuration = {
 export default function CallScreen({
   setScreen,
   screens,
-  roomId,
+  clickedSellerDeviceToken,
   navigation,
   sellerId,
   clickedSellerData,
@@ -71,7 +77,7 @@ export default function CallScreen({
       await database().ref(`/Sellers/${id}`).update({
         userCallStatus: false,
       });
-      console.log('Data updated.', roomId);
+      console.log('Data updated.', clickedSellerDeviceToken);
     } catch (error) {
       console.error('Error updating data:', error);
     }
@@ -258,10 +264,20 @@ export default function CallScreen({
         },
         body: JSON.stringify(message),
       });
+      await firestore()
+        .collection('Notifications')
+        .add({
+          message: message,
+          userName: userData.name,
+          sellerName: clickedSellerData.data.name,
+        })
+        .then(() => {
+          console.log('Notification data added!');
+        });
     }
     async function sendNotificationTypeA(id) {
       const message = {
-        to: roomId,
+        to: clickedSellerDeviceToken,
         notification: {
           title: `${userData.name} Calling`,
           body: `${userData.name} is waiting in the queue`,
@@ -279,7 +295,7 @@ export default function CallScreen({
     // Function to send notification type B
     async function sendNotificationTypeB(id) {
       const message = {
-        to: roomId,
+        to: clickedSellerDeviceToken,
         notification: {
           title: '📲Fasto user Calling',
           body: '📞📞Call from a fasto user📞📞',
@@ -561,60 +577,124 @@ export default function CallScreen({
         </View>
       ) : queueIdx <= 0 ? (
         <>
-          {/* <Text style={styles.heading}>Join Screen</Text> */}
-          {/* <Text style={styles.heading}>Room : {roomId}</Text> */}
-
-          {/* <View style={styles.callButtons}> */}
-
           <View style={{display: 'flex', flex: 1}}>
-            <View style={styles.rtcview}>
+            <Text style={styles.text}>Session with Joseph Parker</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                position: 'absolute',
+                marginTop: '35%',
+                marginHorizontal: '7%',
+              }}>
               {localStream && (
-                <RTCView
-                  style={styles.rtc}
-                  streamURL={localStream && localStream.toURL()}
-                />
+                <View style={styles.localStream}>
+                  <RTCView
+                    style={{
+                      width: width * 0.2,
+                      height: height * 0.2,
+                      objectFit: 'contain',
+                    }}
+                    streamURL={localStream && localStream.toURL()}
+                  />
+                  <View style={{marginHorizontal: 20, marginVertical: 5}}>
+                    <Text
+                      style={{
+                        color: COLORS.white,
+                      }}>
+                      Salma Hellman
+                    </Text>
+                    <Text
+                      style={{
+                        color: COLORS.white,
+                      }}>
+                      Broadcast Organizer
+                    </Text>
+                  </View>
+                </View>
               )}
-            </View>
-            {remoteStream && (
-              <View style={styles.rtcview}>
-                <RTCView
-                  style={styles.rtc}
-                  streamURL={remoteStream && remoteStream.toURL()}
-                />
+              <View
+                style={{
+                  backgroundColor: 'red',
+                  height: height * 0.05,
+                  width: width * 0.2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 30,
+                }}>
+                <Text style={{color: COLORS.white}}>&#x2022; Live</Text>
               </View>
-            )}
+            </View>
+            {/* {remoteStream && ( */}
+            <View style={styles.remoteStream}>
+              <RTCView
+                style={styles.rtc}
+                streamURL={remoteStream && remoteStream.toURL()}
+              />
+            </View>
+            {/* )} */}
           </View>
           <View style={{flexDirection: 'row'}}>
             <View style={styles.toggleButtons}>
-              <TouchableOpacity>
-                <Image
-                  style={{width: 40, height: 40, marginTop: 4}}
-                  source={require('../../assets/images/chat.png')}
+              <TouchableOpacity style={styles.buttons}>
+                <VectorIcon
+                  name={'message'}
+                  type={'Entypo'}
+                  size={30}
+                  color={COLORS.white}
                 />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={toggleSpeaker}>
-                <Image
-                  style={{width: 40, height: 40, marginTop: 4}}
-                  source={speakerOn ? speakerOfImg : speakerOnImg}
+              <TouchableOpacity style={styles.buttons} onPress={toggleSpeaker}>
+                {speakerOn ? (
+                  <VectorIcon
+                    name={'volume-mute'}
+                    type={'Ionicons'}
+                    size={30}
+                    color={COLORS.white}
+                    style={styles.clickedButtons}
+                  />
+                ) : (
+                  <VectorIcon
+                    name={'volume-up'}
+                    type={'FontAwesome'}
+                    size={30}
+                    color={COLORS.white}
+                  />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.buttons} onPress={switchCamera}>
+                <VectorIcon
+                  name={'camera-reverse'}
+                  type={'Ionicons'}
+                  size={30}
+                  color={COLORS.white}
                 />
               </TouchableOpacity>
-              <TouchableOpacity onPress={switchCamera}>
-                <Image
-                  style={{width: 40, height: 40, marginTop: 4}}
-                  source={require('../../assets/images/switch-camera.png')}
-                />
+              <TouchableOpacity style={styles.buttons} onPress={toggleMute}>
+                {isMuted ? (
+                  <VectorIcon
+                    name={'microphone-off'}
+                    type={'MaterialCommunityIcons'}
+                    size={30}
+                    style={styles.clickedButtons}
+                  />
+                ) : (
+                  <VectorIcon
+                    name={'microphone'}
+                    type={'MaterialCommunityIcons'}
+                    size={30}
+                    color={COLORS.white}
+                  />
+                )}
               </TouchableOpacity>
-              <TouchableOpacity onPress={toggleMute}>
-                <Image
-                  style={{width: 40, height: 40, marginTop: 4}}
-                  source={isMuted ? muteMicrophoneImage : microphoneImage}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => onBackPress(channelId)}>
-                <Image
-                  style={{width: 40, height: 40, marginTop: 4}}
-                  source={require('../../assets/images/phone-call-end.png')}
+              <TouchableOpacity
+                style={[styles.buttons, {backgroundColor: 'red'}]}
+                onPress={() => onBackPress(channelId)}>
+                <VectorIcon
+                  name={'cross'}
+                  type={'Entypo'}
+                  size={30}
+                  color={COLORS.white}
                 />
               </TouchableOpacity>
             </View>
@@ -635,27 +715,51 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: 30,
   },
-  rtcview: {
-    width: '100%',
-    height: '100%',
-    flex: 1,
-    borderRadius: 30,
-    overflow: 'hidden',
-    objectFit: 'cover',
-    marginBottom: 20,
-  },
   rtc: {
     width: '100%',
     height: '100%',
-    flex: 1,
-    borderRadius: 18,
-    overflow: 'hidden',
     objectFit: 'cover',
+  },
+  text: {
+    ...FONTS.h1,
+    color: COLORS.white,
+    position: 'absolute',
+    top: 30,
+    marginHorizontal: 25,
+    marginVertical: 30,
+    paddingVertical: '2%',
+  },
+  remoteStream: {
+    position: 'absolute',
+    height: height * 0.88,
+    width: '100%',
+    borderBottomRightRadius: 30,
+    borderBottomLeftRadius: 30,
+    overflow: 'hidden',
+    zIndex: -1,
+    flexDirection: 'row',
+  },
+  localStream: {
+    flexDirection: 'row',
+    // justifyContent: 'space-around',
+  },
+  clickedButtons: {
+    // padding: '4%',
+    alignItems: 'center',
+    backgroundColor: COLORS.gray,
+    borderRadius: 50,
+  },
+  buttons: {
+    padding: '4%',
+    borderRadius: 50,
+    backgroundColor: COLORS.gray,
   },
   toggleButtons: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
+    position: 'absolute',
+    bottom: 110,
   },
   callButtons: {
     padding: 10,
