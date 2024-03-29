@@ -91,8 +91,7 @@ const Authnavigation = () => {
         screenOptions={{
           headerShown: false,
         }}
-        // initialRouteName="MessagingScreen"
-      >
+        initialRouteName="MessagingScreen">
         {user ? (
           <>
             <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
@@ -102,7 +101,7 @@ const Authnavigation = () => {
             <Stack.Screen name="WaitingQueue" component={WaitingQueue} />
             <Stack.Screen name="WebRTCIndex" component={WebRTCIndex} />
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
-            <Stack.Screen name="Message" component={MessagingScreen} />
+            <Stack.Screen name="MessagingScreen" component={MessagingScreen} />
           </>
         ) : (
           <>

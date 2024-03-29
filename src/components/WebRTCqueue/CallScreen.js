@@ -264,16 +264,16 @@ export default function CallScreen({
         },
         body: JSON.stringify(message),
       });
-      await firestore()
-        .collection('Notifications')
-        .add({
-          message: message,
-          userName: userData.name,
-          sellerName: clickedSellerData.data.name,
-        })
-        .then(() => {
-          console.log('Notification data added!');
-        });
+      // await firestore()
+      //   .collection('Notifications')
+      //   .add({
+      //     message: message,
+      //     userName: userData.name,
+      //     sellerName: clickedSellerData.data.name,
+      //   })
+      //   .then(() => {
+      //     console.log('Notification data added!');
+      //   });
     }
     async function sendNotificationTypeA(id) {
       const message = {
