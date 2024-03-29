@@ -163,7 +163,7 @@ const SellerScreen = () => {
   const slideModal = () => {
     Animated.timing(position, {
       toValue: 0, // Update toValue directly
-      duration: 1000,
+      duration: 200,
       useNativeDriver: true,
     }).start();
   };
@@ -172,11 +172,11 @@ const SellerScreen = () => {
     if (modalVisible) {
       slideModal(0); // Slide up when modal is visible
     } else {
-      Animated.timing(position, {
-        toValue: 50, // Update toValue directly
-        duration: 1000,
-        useNativeDriver: true,
-      }).start();
+      // Animated.timing(position, {
+      //   toValue: 50, // Update toValue directly
+      //   duration: 1000,
+      //   useNativeDriver: true,
+      // }).start();
     }
   }, [modalVisible]);
 
@@ -452,7 +452,14 @@ const SellerScreen = () => {
                   backgroundColor: COLORS.white,
                 }}
                 onPress={() => {
-                  setModalVisible(false);
+                  Animated.timing(position, {
+                    toValue: 50, // Update toValue directly
+                    duration: 200,
+                    useNativeDriver: true,
+                  }).start();
+                  setTimeout(() => {
+                    setModalVisible(false);
+                  }, 200);
                   setClickedImageId(null);
                 }}>
                 <VectorIcon
