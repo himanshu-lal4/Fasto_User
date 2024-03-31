@@ -572,31 +572,21 @@ export default function CallScreen({
   return (
     <>
       {queueIdx === -2 ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
         </View>
       ) : queueIdx <= 0 ? (
         <>
           <View style={{display: 'flex', flex: 1}}>
             <Text style={styles.text}>Session with Joseph Parker</Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                position: 'absolute',
-                marginTop: '35%',
-                marginHorizontal: '7%',
-              }}>
+            <View style={styles.localStreamContainer}>
               {localStream && (
                 <View style={styles.localStream}>
                   <RTCView
-                    style={{
-                      width: width * 0.2,
-                      height: height * 0.2,
-                      objectFit: 'contain',
-                    }}
+                    style={styles.localStreamView}
                     streamURL={localStream && localStream.toURL()}
                   />
-                  <View style={{marginHorizontal: 20, marginVertical: 5}}>
+                  <View style={styles.localStreamTextContainer}>
                     <Text
                       style={{
                         color: COLORS.white,
@@ -612,15 +602,7 @@ export default function CallScreen({
                   </View>
                 </View>
               )}
-              <View
-                style={{
-                  backgroundColor: 'red',
-                  height: height * 0.05,
-                  width: width * 0.2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 30,
-                }}>
+              <View style={styles.liveContainer}>
                 <Text style={{color: COLORS.white}}>&#x2022; Live</Text>
               </View>
             </View>
@@ -639,7 +621,7 @@ export default function CallScreen({
                 <VectorIcon
                   name={'message'}
                   type={'FontAwesome6'}
-                  size={30}
+                  size={20}
                   color={COLORS.white}
                 />
               </TouchableOpacity>
@@ -711,6 +693,37 @@ export default function CallScreen({
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  localStreamContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    marginTop: '35%',
+    marginHorizontal: '7%',
+  },
+  localStreamView: {
+    flexDirection: 'row',
+    position: 'absolute',
+    marginTop: '35%',
+    marginHorizontal: '7%',
+  },
+  localStreamTextContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    marginTop: '35%',
+    marginHorizontal: '7%',
+  },
+  liveContainer: {
+    backgroundColor: 'red',
+    height: height * 0.05,
+    width: width * 0.2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 30,
+  },
   heading: {
     alignSelf: 'center',
     fontSize: 30,
@@ -750,9 +763,10 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   buttons: {
-    padding: '4%',
+    padding: '5%',
     borderRadius: 50,
     backgroundColor: '#12131e',
+    alignSelf: 'center',
   },
   toggleButtons: {
     width: '100%',

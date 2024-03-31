@@ -25,10 +25,9 @@ import firestore from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
 import WaitingQueue from '../screens/WaitingQueue';
 import MessagingScreen from '../screens/MessagingScreen';
+import ListScreen from '../screens/ListScreen';
 
 const Stack = createStackNavigator();
-
-// ... (previous imports)
 
 const Authnavigation = () => {
   const dispatch = useDispatch();
@@ -70,7 +69,6 @@ const Authnavigation = () => {
         dispatch(addUID(userExist.uid));
       }
 
-      // Set the authentication state as checked regardless of the user's existence
       setAuthStateChecked(true);
     });
 
@@ -79,9 +77,8 @@ const Authnavigation = () => {
     };
   }, [dispatch]);
 
-  // Render nothing until the authentication state is checked
   if (!authStateChecked) {
-    return <LoadingScreen />; // Replace LoadingScreen with your loading component
+    return <LoadingScreen />;
   }
 
   return (
@@ -91,7 +88,7 @@ const Authnavigation = () => {
         screenOptions={{
           headerShown: false,
         }}
-        // initialRouteName="MessagingScreen"
+        // initialRouteName="ListScreen"
       >
         {user ? (
           <>
@@ -103,6 +100,7 @@ const Authnavigation = () => {
             <Stack.Screen name="WebRTCIndex" component={WebRTCIndex} />
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
             <Stack.Screen name="MessagingScreen" component={MessagingScreen} />
+            <Stack.Screen name="ListScreen" component={ListScreen} />
           </>
         ) : (
           <>

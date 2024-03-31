@@ -171,12 +171,6 @@ const SellerScreen = () => {
   useEffect(() => {
     if (modalVisible) {
       slideModal(0); // Slide up when modal is visible
-    } else {
-      // Animated.timing(position, {
-      //   toValue: 50, // Update toValue directly
-      //   duration: 1000,
-      //   useNativeDriver: true,
-      // }).start();
     }
   }, [modalVisible]);
 
@@ -273,6 +267,19 @@ const SellerScreen = () => {
 
   async function handleCallNotification() {}
 
+  console.log('MODAAAAAAAAAAAAAAL', modalVisible);
+
+  const ModalSlideDown = () => {
+    Animated.timing(position, {
+      toValue: 50,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+    setTimeout(() => {
+      setModalVisible(false);
+    }, 200);
+  };
+
   // Called the function to send the notification
   return (
     <SafeAreaView style={styles.rootContainer}>
@@ -351,14 +358,12 @@ const SellerScreen = () => {
           />
         </View>
       </ScrollView>
-      <Modal
-        animationType="none"
-        transparent={true}
-        visible={modalVisible}
-        style={[styles.modalContainer, {transform: [{translateY: position}]}]}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}>
+      <View
+        style={[
+          styles.modalContainer,
+          {transform: [{translateY: modalVisible ? -65 : 0}]},
+          {display: modalVisible ? 'flex' : 'none'},
+        ]}>
         <Animated.View
           style={[
             styles.modalContainer,
@@ -378,16 +383,13 @@ const SellerScreen = () => {
                 style={styles.button}
                 onPress={async () => {
                   console.log('Calling action');
-                  // handleCallNotification();
-                  // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
                   handleCallNotification();
                   navigation.navigate('WebRTCIndex', {
                     clickedSellerDeviceToken,
                     sellerId,
                     clickedSellerData,
                   });
-                  // navigation.navigate('WebRTCIndex');
-                  setModalVisible(false);
+                  ModalSlideDown();
                   setClickedImageId(null);
                 }}>
                 <VectorIcon
@@ -400,8 +402,9 @@ const SellerScreen = () => {
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {
+                  setClickedImageId(null);
+                  ModalSlideDown();
                   navigation.navigate('MessagingScreen');
-                  setModalVisible(false);
                 }}>
                 <VectorIcon
                   name={'android-messages'}
@@ -414,16 +417,13 @@ const SellerScreen = () => {
                 style={styles.button}
                 onPress={async () => {
                   console.log('Calling action');
-                  // handleCallNotification();
-                  // navigation.navigate('RTCIndex', {clickedSellerDeviceToken});
                   handleCallNotification();
                   navigation.navigate('WebRTCIndex', {
                     clickedSellerDeviceToken,
                     sellerId,
                     clickedSellerData,
                   });
-                  // navigation.navigate('WebRTCIndex');
-                  setModalVisible(false);
+                  ModalSlideDown();
                 }}>
                 <VectorIcon
                   name={'call'}
@@ -436,13 +436,7 @@ const SellerScreen = () => {
             <Shadow
               distance={4}
               stretch={false}
-              style={{
-                justifyContent: 'center',
-                borderRadius: 50,
-                width: 62,
-                height: 62,
-                backgroundColor: COLORS.white,
-              }}
+              style={styles.shadowCross}
               startColor={'#f1f1f1'}
               endColor={COLORS.white}>
               <TouchableOpacity
@@ -452,15 +446,8 @@ const SellerScreen = () => {
                   backgroundColor: COLORS.white,
                 }}
                 onPress={() => {
-                  Animated.timing(position, {
-                    toValue: 50, // Update toValue directly
-                    duration: 200,
-                    useNativeDriver: true,
-                  }).start();
-                  setTimeout(() => {
-                    setModalVisible(false);
-                  }, 200);
                   setClickedImageId(null);
+                  ModalSlideDown();
                 }}>
                 <VectorIcon
                   name={'cross'}
@@ -472,7 +459,7 @@ const SellerScreen = () => {
             </Shadow>
           </LinearGradient>
         </Animated.View>
-      </Modal>
+      </View>
     </SafeAreaView>
   );
 };
@@ -584,7 +571,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     color: COLORS.black,
   },
-  img: {width: '100%', height: '100%', borderRadius: 45},
+  img: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 45,
+  },
   highlightedImage: {
     borderWidth: 2.5,
     borderColor: COLORS.black,
@@ -615,17 +606,18 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     position: 'absolute',
-    bottom: 0,
-    zIndex: 2,
+    bottom: '0.5%',
+    // zIndex: 2,
     width: '100%',
     height: '11%',
   },
   gradient: {
     flexDirection: 'row',
+    // backgroundColor: 'red',
     width: width,
-    height: '100%',
+    height: height * 0.1,
+    paddingVertical: '2%',
     paddingHorizontal: '12%',
-    alignItems: 'center',
     justifyContent: 'space-around',
   },
   button: {
@@ -659,6 +651,13 @@ const styles = StyleSheet.create({
   loaderInner: {
     width: 50,
     height: 50,
+    backgroundColor: COLORS.white,
+  },
+  shadowCross: {
+    justifyContent: 'center',
+    borderRadius: 50,
+    width: 62,
+    height: 62,
     backgroundColor: COLORS.white,
   },
 });
