@@ -57,14 +57,16 @@ const ListScreen = ({navigation}) => {
     <>
       <StatusBar barStyle={'dark-content'} backgroundColor={'#2e59f2'} />
       <View style={styles.container}>
+        <FlatList
+          data={DummyData}
+          renderItem={renderItem}
+          keyExtractor={item => item.Product}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+        />
         <ScrollView
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}>
-          <FlatList
-            data={DummyData}
-            renderItem={renderItem}
-            keyExtractor={item => item.Product}
-          />
           <View style={styles.footerContainer}>
             <VectorIcon
               name={'arrowleft'}
