@@ -213,6 +213,10 @@ export default function CallScreen({
     const videoSourceId = devices.find(
       device => device.kind === 'videoinput' && device.facing === facing,
     );
+    console.log(
+      'video source id ------------------------------- ',
+      videoSourceId,
+    );
     const facingMode = isFront ? 'user' : 'environment';
     const constraints = {
       audio: true,
@@ -411,6 +415,7 @@ export default function CallScreen({
       .collection('rooms')
       .doc(docId);
 
+    console.log('unique channel id', uniqueChannelId, docId);
     const currCallDataRef = roomRef.collection('currCallData').doc(sellerId);
 
     // Set the data for the specific document within the currCallData collection
@@ -429,7 +434,7 @@ export default function CallScreen({
     // }
     const unsubscribe = database()
       .ref(`/Sellers/${roomRef.id}`)
-      .on('value', snapshot => {
+      .once('value', snapshot => {
         const data = snapshot?.val();
         if (data?.sellerCallStatus === false) {
           onBackPress(roomRef.id);
@@ -702,7 +707,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     position: 'absolute',
     marginTop: '35%',
-    marginHorizontal: '7%',
+    marginHorizontal: '27%',
   },
   localStreamView: {
     flexDirection: 'row',

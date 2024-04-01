@@ -1,4 +1,11 @@
-import {FlatList, TouchableOpacity, StyleSheet, Text, View} from 'react-native';
+import {
+  FlatList,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {DummyData} from '../components/Common/DummyData';
 import React, {useState} from 'react';
 import {COLORS, FONTS} from '../assets/theme';
@@ -6,6 +13,7 @@ import {Dimensions} from 'react-native';
 import VectorIcon from '../assets/VectorIcon/VectorIcon';
 import {ScrollView} from 'react-native-virtualized-view';
 import {StatusBar} from 'react-native';
+import Line from '../components/Common/Line';
 
 const {width, height} = Dimensions.get('window');
 
@@ -25,37 +33,46 @@ const ListScreen = ({navigation}) => {
   };
 
   const renderItem = ({item}) => (
-    <TouchableOpacity
-      style={[
-        styles.renderContainer,
-        checkedItems.includes(item.Product)
-          ? {backgroundColor: '#5699f0'}
-          : {backgroundColor: '#2048d5'},
-      ]}
-      onPress={() => handleToggle(item.Product)}>
-      <View
-        style={[
-          styles.checkbox,
-          {
-            backgroundColor: checkedItems.includes(item.Product)
-              ? COLORS.white
-              : 'transparent',
-            borderColor: COLORS.white,
-          },
-        ]}>
-        {checkedItems.includes(item.Product) && (
-          <View style={styles.checkedIndicator} />
-        )}
-      </View>
-      <View style={styles.detailsContainer}>
-        <Text style={styles.productName}>{item.Product}</Text>
-        <Text style={styles.productDescription}>{item.Description}</Text>
-      </View>
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity
+        style={[styles.renderContainer]}
+        onPress={() => handleToggle(item.Product)}>
+        <Image source={item.img} style={styles.img} />
+        <View style={styles.detailsContainer}>
+          <Text style={styles.productName}>{item.Product}</Text>
+          <View style={{width: width * 0.48}}>
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={styles.productDescription}>
+              {item.Description}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.checkbox}>
+          <Text
+            style={[
+              styles.checkedIndicator,
+              {
+                backgroundColor: checkedItems.includes(item.Product)
+                  ? COLORS.white
+                  : 'transparent',
+                borderColor: COLORS.white,
+              },
+            ]}>
+            {/* {checkedItems.includes(item.Product) && (
+            // <View style={styles.checkedIndicator}>Get</View>
+          )} */}
+            Get
+          </Text>
+        </View>
+      </TouchableOpacity>
+      <Line line1Width={'70%'} line2Width={'0'} customStyle={styles.line} />
+    </>
   );
   return (
     <>
-      <StatusBar barStyle={'dark-content'} backgroundColor={'#2e59f2'} />
+      <StatusBar barStyle={'light-content'} backgroundColor={'#2e59f2'} />
       <View style={styles.container}>
         <FlatList
           data={DummyData}
@@ -94,7 +111,7 @@ export default ListScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#2e59f2',
+    backgroundColor: COLORS.white,
     height: height,
     width: width,
     padding: '5%',
@@ -102,35 +119,51 @@ const styles = StyleSheet.create({
   renderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 10,
-    marginBottom: '4%',
-    padding: '4%',
+    // marginBottom: '4%',
+    paddingHorizontal: '3%',
+    paddingTop: '2%',
+  },
+  line: {
+    margin: 0,
+    padding: 0,
+    height: 0,
+    justifyContent: 'flex-end',
   },
   checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
-    borderWidth: 2,
+    // height: '100%',
+    // width: '15%',
+    backgroundColor: COLORS.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: '3%',
+    // paddingHorizontal: '4%',
+    // paddingVertical: '10%',
+    borderRadius: 20,
+    position: 'absolute',
+    right: 0,
   },
   checkedIndicator: {
-    width: 12,
-    height: 12,
     backgroundColor: COLORS.white,
-    borderRadius: 2,
+    color: COLORS.darkBlue,
+    // width: '100%',
+    // height: '100%',
+    textAlign: 'center',
+  },
+  img: {
+    width: '20%',
+    height: '130%',
+    borderRadius: 10,
   },
   detailsContainer: {
     marginHorizontal: '3%',
   },
   productName: {
     fontSize: 14,
-    color: '#9cb1f8',
+    color: COLORS.black,
   },
   productDescription: {
     fontSize: 16,
-    color: COLORS.white,
+    color: COLORS.black,
   },
   footerContainer: {
     flexDirection: 'row',
@@ -145,7 +178,7 @@ const styles = StyleSheet.create({
   footerButton: {
     paddingHorizontal: '30%',
     paddingVertical: '7%',
-    backgroundColor: COLORS.white,
+    backgroundColor: '#2850de',
     marginLeft: '2%',
     borderRadius: 30,
     justifyContent: 'center',
@@ -154,6 +187,6 @@ const styles = StyleSheet.create({
   footerButtonText: {
     fontSize: 15,
     fontWeight: '700',
-    color: COLORS.black,
+    color: COLORS.white,
   },
 });

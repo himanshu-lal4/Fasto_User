@@ -4,6 +4,7 @@ import {
   FlatList,
   View,
   StatusBar,
+  Image,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import VectorIcon from '../assets/VectorIcon/VectorIcon';
@@ -23,6 +24,9 @@ const MessagingScreen = ({navigation}) => {
   useEffect(() => {
     const slicedData = DummyData.slice(0, 3);
     setData(slicedData);
+
+    const initialCheckedItems = slicedData.map(item => item.Product);
+    setCheckedItems(initialCheckedItems);
   }, []);
 
   const handleToggle = itemName => {
@@ -65,6 +69,16 @@ const MessagingScreen = ({navigation}) => {
             : {backgroundColor: '#2048d5'},
         ]}
         onPress={() => handleToggle(item.Product)}>
+        <Image source={item.img} style={styles.img} />
+        <View style={styles.detailsContainer}>
+          <Text style={styles.productName}>{item.Product}</Text>
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={styles.productDescription}>
+            {item.Description}
+          </Text>
+        </View>
         <View
           style={[
             styles.checkbox,
@@ -78,10 +92,6 @@ const MessagingScreen = ({navigation}) => {
           {checkedItems.includes(item.Product) && (
             <View style={styles.checkedIndicator} />
           )}
-        </View>
-        <View style={styles.detailsContainer}>
-          <Text style={styles.productName}>{item.Product}</Text>
-          <Text style={styles.productDescription}>{item.Description}</Text>
         </View>
       </TouchableOpacity>
     </Swipeable>
@@ -125,21 +135,14 @@ const MessagingScreen = ({navigation}) => {
               keyExtractor={item => item.Product}
             />
           </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('ListScreen')}>
-              <Text style={styles.productDescription}>+ Add More</Text>
-            </TouchableOpacity>
-          </View>
           <View style={styles.footerContainer}>
             <TouchableOpacity style={styles.footerIcon}>
               <VectorIcon
-                name={'arrowleft'}
+                name={'plus'}
                 type={'AntDesign'}
                 size={25}
                 color={COLORS.white}
-                onPress={() => navigation.goBack()}
+                onPress={() => navigation.navigate('ListScreen')}
               />
             </TouchableOpacity>
             <View>
@@ -211,13 +214,15 @@ const styles = StyleSheet.create({
     marginHorizontal: '3%',
   },
   checkbox: {
-    width: 18,
+    width: 0,
     height: 18,
     borderRadius: 4,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: '3%',
+    position: 'absolute',
+    right: 15,
   },
   checkedIndicator: {
     width: 12,
@@ -260,11 +265,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#5699f0',
     borderRadius: 30,
   },
+  img: {
+    width: '20%',
+    height: '130%',
+    borderRadius: 5,
+  },
   footerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: '15%',
-    marginTop: '5%',
+    marginTop: '25%',
   },
   footerIcon: {
     padding: '5%',
