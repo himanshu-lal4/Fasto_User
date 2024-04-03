@@ -15,38 +15,52 @@ import ProgressBar from '../components/Common/ProgressBar';
 import {Dimensions} from 'react-native';
 import {Swipeable} from 'react-native-gesture-handler';
 import {ScrollView} from 'react-native-virtualized-view';
+import {useDispatch, useSelector} from 'react-redux';
+import {deleteItem} from '../redux/ItemSlice';
 const {width, height} = Dimensions.get('window');
 
 const MessagingScreen = ({navigation}) => {
   const [checkedItems, setCheckedItems] = useState([]);
+  const [estimatedPrice, setEstimatedPrice] = useState(0);
+  const selectedData = useSelector(state => state.items.selectedItems);
   const [data, setData] = useState();
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    const slicedData = DummyData.slice(0, 3);
-    setData(slicedData);
-
-    const initialCheckedItems = slicedData.map(item => item.Product);
+    const initialCheckedItems = selectedData.map(item => {
+      return item.Product;
+    });
     setCheckedItems(initialCheckedItems);
-  }, []);
+    calculateEstimatedPrice(selectedData);
+  }, [selectedData]);
 
-  const handleToggle = itemName => {
-    const currentIndex = checkedItems.indexOf(itemName);
+  const calculateEstimatedPrice = items => {
+    let total = 0;
+    items.forEach(item => {
+      total += item.Price * item.Quantity;
+    });
+    setEstimatedPrice(total);
+  };
+
+  const handleToggle = item => {
+    const currentIndex = checkedItems.indexOf(item.Product);
     const newChecked = [...checkedItems];
 
     if (currentIndex === -1) {
-      newChecked.push(itemName);
+      newChecked.push(item.Product);
+      const addPrice = item.Price;
+      setEstimatedPrice(estimatedPrice + addPrice);
     } else {
       newChecked.splice(currentIndex, 1);
+      const addPrice = item.Price;
+      setEstimatedPrice(estimatedPrice - addPrice);
     }
-
     setCheckedItems(newChecked);
   };
 
   const handleRemove = item => {
-    const filteredData = data.filter(id => {
-      return id.Product !== item;
-    });
-    setData(filteredData);
+    dispatch(deleteItem(item));
   };
 
   const renderLeft = item => {
@@ -60,7 +74,7 @@ const MessagingScreen = ({navigation}) => {
   };
 
   const renderItem = ({item}) => (
-    <Swipeable renderRightActions={() => renderLeft(item.Product)}>
+    <Swipeable renderRightActions={() => renderLeft(item)}>
       <TouchableOpacity
         style={[
           styles.renderContainer,
@@ -68,7 +82,7 @@ const MessagingScreen = ({navigation}) => {
             ? {backgroundColor: '#5699f0'}
             : {backgroundColor: '#2048d5'},
         ]}
-        onPress={() => handleToggle(item.Product)}>
+        onPress={() => handleToggle(item)}>
         <Image source={item.img} style={styles.img} />
         <View style={styles.detailsContainer}>
           <Text style={styles.productName}>{item.Product}</Text>
@@ -99,7 +113,7 @@ const MessagingScreen = ({navigation}) => {
 
   return (
     <>
-      <StatusBar barStyle={'dark-content'} backgroundColor={'#2e59f2'} />
+      <StatusBar barStyle={'light-content'} backgroundColor={'#4269f3'} />
       <View style={styles.container}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -130,28 +144,33 @@ const MessagingScreen = ({navigation}) => {
           </View>
           <View style={styles.listContainer}>
             <FlatList
-              data={data}
+              data={selectedData}
               renderItem={renderItem}
-              keyExtractor={item => item.Product}
+              keyExtractor={(item, index) => index.toString()}
             />
           </View>
-          <View style={styles.footerContainer}>
-            <TouchableOpacity style={styles.footerIcon}>
-              <VectorIcon
-                name={'plus'}
-                type={'AntDesign'}
-                size={25}
-                color={COLORS.white}
-                onPress={() => navigation.navigate('ListScreen')}
-              />
-            </TouchableOpacity>
-            <View>
-              <TouchableOpacity style={styles.footerButton}>
-                <Text style={styles.footerButtonText}>Continue</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
         </ScrollView>
+        <View style={styles.footerContainer}>
+          <TouchableOpacity
+            style={styles.footerIcon}
+            onPress={() => navigation.navigate('ListScreen')}>
+            <VectorIcon
+              name={'plus'}
+              type={'AntDesign'}
+              size={25}
+              color={COLORS.white}
+            />
+          </TouchableOpacity>
+          <View>
+            <TouchableOpacity
+              style={styles.footerButton}
+              onPress={() => navigation.navigate('addressScreen')}>
+              <Text style={styles.footerButtonText}>
+                continue - &#x20B9;{estimatedPrice}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     </>
   );
@@ -161,7 +180,7 @@ export default MessagingScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#2e59f2',
+    backgroundColor: '#4269f3',
     height: height,
     width: width,
     paddingHorizontal: '5%',
@@ -175,6 +194,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     marginTop: '13%',
+    marginBottom: '5%',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -273,7 +293,7 @@ const styles = StyleSheet.create({
   footerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: '25%',
+    marginVertical: '5%',
   },
   footerIcon: {
     padding: '5%',
@@ -281,7 +301,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2850de',
   },
   footerButton: {
-    paddingHorizontal: '30%',
+    paddingHorizontal: '24%',
     paddingVertical: '7%',
     backgroundColor: COLORS.white,
     marginLeft: '2%',

@@ -88,8 +88,7 @@ const Authnavigation = () => {
         screenOptions={{
           headerShown: false,
         }}
-        // initialRouteName="ListScreen"
-      >
+        initialRouteName="MessagingScreen">
         {user ? (
           <>
             <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
