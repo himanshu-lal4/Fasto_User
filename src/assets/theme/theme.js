@@ -31,7 +31,7 @@ export const SIZES = {
   h1: 34,
   h2: 22,
   h3: 16,
-  h4: 14,
+  h4: 20,
   body1: 30,
   body2: 22,
   body3: 20,
@@ -56,7 +56,7 @@ export const FONTS = {
   h1: {fontFamily: 'Nunito-Bold', fontSize: SIZES.h1, lineHeight: 36},
   h2: {fontFamily: 'Nunito-Bold', fontSize: SIZES.h2, lineHeight: 30},
   h3: {fontFamily: 'Nunito-Bold', fontSize: SIZES.h3, lineHeight: 22},
-  h4: {fontFamily: 'Nunito-Bold', fontSize: SIZES.h4, lineHeight: 22},
+  h4: {fontFamily: 'Nunito-Bold', fontSize: SIZES.h4},
 
   body1: {
     fontFamily: 'Nunito-Bold',

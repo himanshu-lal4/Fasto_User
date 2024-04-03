@@ -8,11 +8,12 @@ const InputText = ({
   onChangeText,
   secure = false,
   inputStyle,
+  color,
 }) => {
   return (
     <View style={{marginTop: 20}}>
       <View style={styles.labelContainer}>
-        <Text style={{color: '#050087'}}>{placeholder}</Text>
+        <Text style={{color: color}}>{placeholder}</Text>
       </View>
       <TextInput
         style={[styles.textInput, inputStyle]}

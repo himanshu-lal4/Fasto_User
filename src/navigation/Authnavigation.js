@@ -26,6 +26,7 @@ import messaging from '@react-native-firebase/messaging';
 import WaitingQueue from '../screens/WaitingQueue';
 import MessagingScreen from '../screens/MessagingScreen';
 import ListScreen from '../screens/ListScreen';
+import AddressScreen from '../screens/AddressScreen';
 
 const Stack = createStackNavigator();
 
@@ -88,7 +89,7 @@ const Authnavigation = () => {
         screenOptions={{
           headerShown: false,
         }}
-        initialRouteName="MessagingScreen">
+        initialRouteName="AddressScreen">
         {user ? (
           <>
             <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
@@ -100,6 +101,7 @@ const Authnavigation = () => {
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
             <Stack.Screen name="MessagingScreen" component={MessagingScreen} />
             <Stack.Screen name="ListScreen" component={ListScreen} />
+            <Stack.Screen name="addressScreen" component={AddressScreen} />
           </>
         ) : (
           <>
