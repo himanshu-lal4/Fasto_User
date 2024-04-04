@@ -2,7 +2,7 @@ import {View, Text, StyleSheet} from 'react-native';
 import React from 'react';
 import {COLORS, FONTS, SIZES, theme} from '../../assets/theme';
 
-const Line = ({line1Width, line2Width, text, customStyle}) => {
+const CustomLine = ({line1Width, line2Width, text, customStyle}) => {
   return (
     <View style={[styles.container, customStyle]}>
       <View
@@ -22,7 +22,7 @@ const Line = ({line1Width, line2Width, text, customStyle}) => {
   );
 };
 
-export default Line;
+export default CustomLine;
 
 const styles = StyleSheet.create({
   container: {
@@ -35,14 +35,14 @@ const styles = StyleSheet.create({
   },
   text: {
     marginHorizontal: 10,
-    color: COLORS.darkBlue,
+    color: COLORS.gray,
   },
   line1: {
     height: 1,
-    backgroundColor: COLORS.darkBlue,
+    backgroundColor: COLORS.gray,
   },
   line2: {
     height: 1,
-    backgroundColor: COLORS.darkBlue,
+    backgroundColor: COLORS.gray,
   },
 });

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -8,21 +8,75 @@ import {
   Modal,
   ScrollView,
   KeyboardAvoidingView,
+  FlatList,
 } from 'react-native';
+import {Formik} from 'formik';
 import {COLORS, FONTS} from '../assets/theme';
 import {Dimensions} from 'react-native';
 import VectorIcon from '../assets/VectorIcon/VectorIcon';
 import InputText from '../../src/components/Common/InputText';
-import {Line} from 'react-native-svg';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
+import CustomLine from '../components/Common/customLine';
+import {firebase, firestore} from '@react-native-firebase/firestore';
+import {Swipeable} from 'react-native-gesture-handler';
 
 const {width, height} = Dimensions.get('window');
 
 const AddressScreen = ({navigation}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+
+  useEffect(() => {
+    const unsubscribe = firebase
+      .firestore()
+      .collection('addresses')
+      .onSnapshot(snapshot => {
+        const addressesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setAddresses(addressesData);
+      });
+
+    return () => unsubscribe();
+  }, []);
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
+  };
+
+  const saveAddressToFirebase = async values => {
+    try {
+      const db = firebase.firestore();
+      await db.collection('addresses').add(values);
+    } catch (error) {
+      console.error('Error saving address to Firebase:', error);
+    }
+  };
+
+  const deleteAddress = async id => {
+    try {
+      const db = firebase.firestore();
+      await db.collection('addresses').doc(id).delete();
+    } catch (error) {
+      console.error('Error deleting address from Firebase:', error);
+    }
+  };
+
+  const renderRight = id => {
+    return [
+      <TouchableOpacity
+        style={styles.renderRight}
+        onPress={() => deleteAddress(id)}
+        key={id}>
+        <VectorIcon
+          name={'delete'}
+          type={'AntDesign'}
+          size={22}
+          color={COLORS.white}
+          onPress={() => navigation.goBack()}
+        />
+      </TouchableOpacity>,
+    ];
   };
 
   return (
@@ -55,6 +109,41 @@ const AddressScreen = ({navigation}) => {
           color={COLORS.blue}
         />
       </TouchableOpacity>
+      <CustomLine
+        text={'SAVED ADDRESSES'}
+        line1Width={'30%'}
+        line2Width={'30%'}
+      />
+      <FlatList
+        data={addresses.reverse()}
+        keyExtractor={item => item.id}
+        renderItem={({item}) => (
+          <Swipeable renderRightActions={() => renderRight(item.id)}>
+            <View style={styles.addressItem}>
+              <View>
+                <Text style={styles.deliverText}>DELIVERS TO</Text>
+              </View>
+              <View style={styles.addressIcon}>
+                <VectorIcon
+                  name={'home'}
+                  type={'Octicons'}
+                  size={24}
+                  color={COLORS.black}
+                  style={styles.homeIcon}
+                />
+                <View style={styles.address}>
+                  <Text style={styles.homeText}>Home</Text>
+                  <Text style={styles.address2}>{item.flatHouseBuilding},</Text>
+                  <Text style={styles.address2}>
+                    {item.areaSectorLocality},
+                  </Text>
+                  <Text style={styles.address2}>{item.landmark}</Text>
+                </View>
+              </View>
+            </View>
+          </Swipeable>
+        )}
+      />
       <Modal
         animationType="slide"
         transparent={true}
@@ -67,50 +156,75 @@ const AddressScreen = ({navigation}) => {
           backgroundColor={'rgba(0, 0, 0, 0.5)'}
         />
         <KeyboardAvoidingView style={{flex: 1}}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalText}>Enter address details</Text>
-                <VectorIcon
-                  name={'close'}
-                  type={'AntDesign'}
-                  size={20}
-                  color={COLORS.gray}
-                  onPress={toggleModal}
-                />
-              </View>
-              <ScrollView>
-                <View style={styles.inputContainer}>
-                  <InputText
-                    placeholder={`Receiver's name`}
-                    inputStyle={styles.input}
-                  />
-                  <InputText
-                    placeholder={`Receiver's contact`}
-                    inputStyle={styles.input}
-                  />
-                  <View style={styles.line}></View>
-                  <InputText
-                    placeholder={`Flat/ House no./ Building*`}
-                    inputStyle={styles.input}
-                  />
-                  <InputText
-                    placeholder={`Area / sector / Locality*`}
-                    inputStyle={styles.input}
-                  />
-                  <InputText
-                    placeholder={`Landmark (optional)`}
-                    inputStyle={styles.input}
-                  />
+          <Formik
+            initialValues={{
+              flatHouseBuilding: '',
+              areaSectorLocality: '',
+              landmark: '',
+            }}
+            onSubmit={(values, {resetForm}) => {
+              saveAddressToFirebase(values);
+              resetForm();
+              toggleModal();
+            }}>
+            {({handleChange, handleBlur, handleSubmit, values}) => (
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalText}>Enter address details</Text>
+                    <VectorIcon
+                      name={'close'}
+                      type={'AntDesign'}
+                      size={20}
+                      color={COLORS.gray}
+                      onPress={toggleModal}
+                    />
+                  </View>
+                  <ScrollView>
+                    <View style={styles.inputContainer}>
+                      <InputText
+                        placeholder={`Receiver's name`}
+                        inputStyle={styles.input}
+                      />
+                      <InputText
+                        placeholder={`Receiver's contact`}
+                        inputStyle={styles.input}
+                      />
+                      <View style={styles.line}></View>
+                      <InputText
+                        placeholder={`Flat/ House no./ Building*`}
+                        inputStyle={styles.input}
+                        onChangeText={handleChange('flatHouseBuilding')}
+                        onBlur={handleBlur('flatHouseBuilding')}
+                        value={values.flatHouseBuilding}
+                      />
+                      <InputText
+                        placeholder={`Area / sector / Locality*`}
+                        inputStyle={styles.input}
+                        onChangeText={handleChange('areaSectorLocality')}
+                        onBlur={handleBlur('areaSectorLocality')}
+                        value={values.areaSectorLocality}
+                      />
+                      <InputText
+                        placeholder={`Landmark (optional)`}
+                        inputStyle={styles.input}
+                        onChangeText={handleChange('landmark')}
+                        onBlur={handleBlur('landmark')}
+                        value={values.landmark}
+                      />
+                    </View>
+                  </ScrollView>
+                  <View style={styles.footer}>
+                    <TouchableOpacity
+                      style={styles.buttonContainer}
+                      onPress={handleSubmit}>
+                      <Text style={styles.buttonText}>Save Address</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </ScrollView>
-              <View style={styles.footer}>
-                <TouchableOpacity style={styles.buttonContainer}>
-                  <Text style={styles.buttonText}>Save Address</Text>
-                </TouchableOpacity>
               </View>
-            </View>
-          </View>
+            )}
+          </Formik>
         </KeyboardAvoidingView>
       </Modal>
     </View>
@@ -134,6 +248,9 @@ const styles = StyleSheet.create({
     ...FONTS.h2,
     color: COLORS.black,
     marginLeft: '5%',
+  },
+  addressesLine: {
+    borderColor: COLORS.gray,
   },
   addContainer: {
     flexDirection: 'row',
@@ -183,7 +300,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   input: {
-    borderColor: COLORS.gray,
+    borderColor: '#d9d8dc',
   },
   line: {
     borderTopWidth: 2,
@@ -209,5 +326,44 @@ const styles = StyleSheet.create({
   buttonText: {
     color: COLORS.white,
     fontSize: 20,
+  },
+  addressItem: {
+    backgroundColor: COLORS.white,
+    padding: '3%',
+    borderRadius: 18,
+    marginBottom: '5%',
+  },
+  deliverText: {
+    color: '#316bbb',
+  },
+  addressIcon: {
+    flexDirection: 'row',
+    // backgroundColor: 'pink',
+    marginHorizontal: '5%',
+    marginVertical: '3%',
+  },
+  homeIcon: {
+    paddingTop: '2%',
+  },
+  homeText: {
+    color: COLORS.black,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  address: {
+    marginLeft: '10%',
+    justifyContent: 'flex-start',
+  },
+  address2: {
+    fontSize: 16,
+  },
+  renderRight: {
+    backgroundColor: '#f04f5f',
+    height: '90%',
+    width: '20%',
+    marginLeft: '2%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
   },
 });
