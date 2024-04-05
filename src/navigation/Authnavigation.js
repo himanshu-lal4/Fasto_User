@@ -27,6 +27,7 @@ import WaitingQueue from '../screens/WaitingQueue';
 import MessagingScreen from '../screens/MessagingScreen';
 import ListScreen from '../screens/ListScreen';
 import AddressScreen from '../screens/AddressScreen';
+import ChatScreen from '../screens/ChatScreen';
 
 const Stack = createStackNavigator();
 
@@ -102,6 +103,7 @@ const Authnavigation = () => {
             <Stack.Screen name="MessagingScreen" component={MessagingScreen} />
             <Stack.Screen name="ListScreen" component={ListScreen} />
             <Stack.Screen name="addressScreen" component={AddressScreen} />
+            <Stack.Screen name="ChatScreen" component={ChatScreen} />
           </>
         ) : (
           <>

@@ -404,7 +404,9 @@ const SellerScreen = () => {
                 onPress={async () => {
                   setClickedImageId(null);
                   ModalSlideDown();
-                  navigation.navigate('MessagingScreen');
+                  navigation.navigate('MessagingScreen', {
+                    clickedSellerData: clickedSellerData,
+                  });
                 }}>
                 <VectorIcon
                   name={'android-messages'}

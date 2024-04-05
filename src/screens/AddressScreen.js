@@ -16,14 +16,17 @@ import {Dimensions} from 'react-native';
 import VectorIcon from '../assets/VectorIcon/VectorIcon';
 import InputText from '../../src/components/Common/InputText';
 import CustomLine from '../components/Common/customLine';
-import {firebase, firestore} from '@react-native-firebase/firestore';
+import {firebase} from '@react-native-firebase/firestore';
 import {Swipeable} from 'react-native-gesture-handler';
 
 const {width, height} = Dimensions.get('window');
 
-const AddressScreen = ({navigation}) => {
+const AddressScreen = ({navigation, route}) => {
+  const {selectedItems} = route.params;
+  const {clickedSellerData} = route.params;
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [addresses, setAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
   useEffect(() => {
     const unsubscribe = firebase
@@ -79,6 +82,27 @@ const AddressScreen = ({navigation}) => {
     ];
   };
 
+  const handleAddressPress = addressId => {
+    if (selectedAddress === addressId) {
+      setSelectedAddress(null);
+    } else {
+      setSelectedAddress(addressId);
+    }
+  };
+
+  const continueButton = (
+    <TouchableOpacity
+      style={styles.continueButton}
+      onPress={() =>
+        navigation.navigate('ChatScreen', {
+          items: selectedItems,
+          clickedSellerData: clickedSellerData,
+        })
+      }>
+      <Text style={styles.continueButtonText}>Continue</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle={'dark-content'} backgroundColor={'#f5f6fb'} />
@@ -115,11 +139,16 @@ const AddressScreen = ({navigation}) => {
         line2Width={'30%'}
       />
       <FlatList
-        data={addresses.reverse()}
+        data={addresses}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <Swipeable renderRightActions={() => renderRight(item.id)}>
-            <View style={styles.addressItem}>
+            <TouchableOpacity
+              style={[
+                styles.addressItem,
+                selectedAddress === item.id && styles.selectedAddressItem,
+              ]}
+              onPress={() => handleAddressPress(item.id)}>
               <View>
                 <Text style={styles.deliverText}>DELIVERS TO</Text>
               </View>
@@ -140,10 +169,11 @@ const AddressScreen = ({navigation}) => {
                   <Text style={styles.address2}>{item.landmark}</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           </Swipeable>
         )}
       />
+      {selectedAddress && continueButton}
       <Modal
         animationType="slide"
         transparent={true}
@@ -332,13 +362,17 @@ const styles = StyleSheet.create({
     padding: '3%',
     borderRadius: 18,
     marginBottom: '5%',
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+  },
+  selectedAddressItem: {
+    borderColor: 'blue',
   },
   deliverText: {
     color: '#316bbb',
   },
   addressIcon: {
     flexDirection: 'row',
-    // backgroundColor: 'pink',
     marginHorizontal: '5%',
     marginVertical: '3%',
   },
@@ -365,5 +399,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+  },
+  continueButton: {
+    backgroundColor: COLORS.blue,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  continueButtonText: {
+    color: COLORS.white,
+    fontSize: 18,
   },
 });

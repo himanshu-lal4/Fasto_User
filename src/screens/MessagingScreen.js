@@ -19,7 +19,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {deleteItem} from '../redux/ItemSlice';
 const {width, height} = Dimensions.get('window');
 
-const MessagingScreen = ({navigation}) => {
+const MessagingScreen = ({navigation, route}) => {
+  const {clickedSellerData} = route.params;
   const [checkedItems, setCheckedItems] = useState([]);
   const [estimatedPrice, setEstimatedPrice] = useState(0);
   const selectedData = useSelector(state => state.items.selectedItems);
@@ -164,7 +165,12 @@ const MessagingScreen = ({navigation}) => {
           <View>
             <TouchableOpacity
               style={styles.footerButton}
-              onPress={() => navigation.navigate('addressScreen')}>
+              onPress={() =>
+                navigation.navigate('addressScreen', {
+                  selectedItems: selectedData,
+                  clickedSellerData: clickedSellerData,
+                })
+              }>
               <Text style={styles.footerButtonText}>
                 continue - &#x20B9;{estimatedPrice}
               </Text>
