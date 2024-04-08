@@ -27,11 +27,13 @@ const AddressScreen = ({navigation, route}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const currentUser = firebase.auth().currentUser;
 
   useEffect(() => {
     const unsubscribe = firebase
       .firestore()
       .collection('addresses')
+      .where('userId', '==', currentUser.uid)
       .onSnapshot(snapshot => {
         const addressesData = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -50,7 +52,15 @@ const AddressScreen = ({navigation, route}) => {
   const saveAddressToFirebase = async values => {
     try {
       const db = firebase.firestore();
-      await db.collection('addresses').add(values);
+      const currentUser = firebase.auth().currentUser;
+      if (currentUser) {
+        await db.collection('addresses').add({
+          ...values,
+          userId: currentUser.uid,
+        });
+      } else {
+        console.error('No user logged in');
+      }
     } catch (error) {
       console.error('Error saving address to Firebase:', error);
     }
@@ -214,15 +224,18 @@ const AddressScreen = ({navigation, route}) => {
                     <View style={styles.inputContainer}>
                       <InputText
                         placeholder={`Receiver's name`}
+                        color={'grey'}
                         inputStyle={styles.input}
                       />
                       <InputText
                         placeholder={`Receiver's contact`}
+                        color={'grey'}
                         inputStyle={styles.input}
                       />
                       <View style={styles.line}></View>
                       <InputText
                         placeholder={`Flat/ House no./ Building*`}
+                        color={'grey'}
                         inputStyle={styles.input}
                         onChangeText={handleChange('flatHouseBuilding')}
                         onBlur={handleBlur('flatHouseBuilding')}
@@ -230,6 +243,7 @@ const AddressScreen = ({navigation, route}) => {
                       />
                       <InputText
                         placeholder={`Area / sector / Locality*`}
+                        color={'grey'}
                         inputStyle={styles.input}
                         onChangeText={handleChange('areaSectorLocality')}
                         onBlur={handleBlur('areaSectorLocality')}
@@ -237,6 +251,7 @@ const AddressScreen = ({navigation, route}) => {
                       />
                       <InputText
                         placeholder={`Landmark (optional)`}
+                        color={'grey'}
                         inputStyle={styles.input}
                         onChangeText={handleChange('landmark')}
                         onBlur={handleBlur('landmark')}
@@ -390,6 +405,7 @@ const styles = StyleSheet.create({
   },
   address2: {
     fontSize: 16,
+    color: COLORS.gray,
   },
   renderRight: {
     backgroundColor: '#f04f5f',

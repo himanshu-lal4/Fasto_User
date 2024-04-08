@@ -1,4 +1,4 @@
-import {StatusBar, StyleSheet, Text, Image, View, FlatList} from 'react-native';
+import {StatusBar, StyleSheet, Text, Image, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {GiftedChat} from 'react-native-gifted-chat';
 import VectorIcon from '../assets/VectorIcon/VectorIcon';
@@ -32,13 +32,13 @@ const ChatScreen = ({navigation, route}) => {
     setMessages([orderDetailsMessage]);
   };
 
-  const onSend = (newMessages = []) => {
+  const onSend = newMessages => {
     setMessages(prevMessages => GiftedChat.append(prevMessages, newMessages));
   };
 
   return (
     <>
-      <StatusBar barStyle={'dark-content'} backgroundColor={'#f5f6fb'} />
+      <StatusBar barStyle={'dark-content'} backgroundColor={'white'} />
       <View style={styles.header}>
         <VectorIcon
           name={'arrowleft'}
@@ -52,31 +52,32 @@ const ChatScreen = ({navigation, route}) => {
           source={{uri: clickedSellerData?.data?.imageUrl}}
         />
         <View style={styles.headerText}>
-          <Text>{clickedSellerData.data.name}</Text>
-          <Text>{clickedSellerData.data.email}</Text>
+          <Text style={{color: 'grey'}}>{clickedSellerData.data.name}</Text>
+          <Text style={{color: 'grey'}}>{clickedSellerData.data.email}</Text>
         </View>
       </View>
-      {/* <FlatList
-        data={items}
-        ListHeaderComponent={
-          <View style={styles.orderDetailsContainer}>
-            <Text style={styles.title}>Order Details</Text>
-          </View>
-        }
-        renderItem={({item}) => (
-          <View style={styles.itemContainer}>
-            <Text>{item.Product}</Text>
-            <Text>Quantity: {item.Quantity}</Text>
-            <Text>Price: {item.Price}</Text>
-          </View>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      /> */}
       <GiftedChat
         messages={messages}
-        onSend={newMessages => onSend(newMessages)}
+        onSend={onSend}
         user={{
           _id: 1,
+        }}
+        // Custom styles for GiftedChat
+        renderBubble={props => {
+          return (
+            <View
+              style={{
+                maxWidth: '80%',
+                borderRadius: 15,
+                backgroundColor: '#ddf7ff',
+                padding: 10,
+                marginBottom: 5,
+                alignSelf:
+                  props.position === 'right' ? 'flex-end' : 'flex-start',
+              }}>
+              <Text style={{color: 'black'}}>{props.currentMessage.text}</Text>
+            </View>
+          );
         }}
       />
     </>
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f6fb',
+    backgroundColor: 'white',
     padding: 10,
   },
   img: {
@@ -100,19 +101,5 @@ const styles = StyleSheet.create({
   },
   headerText: {
     marginLeft: 10,
-  },
-  orderDetailsContainer: {
-    backgroundColor: '#def6ff',
-    padding: 10,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  itemContainer: {
-    marginBottom: 10,
-    alignItems: 'center',
   },
 });
