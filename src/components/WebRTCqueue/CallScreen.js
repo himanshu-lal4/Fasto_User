@@ -8,6 +8,7 @@ import {
   Image,
   BackHandler,
   ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 
 import {
@@ -582,6 +583,7 @@ export default function CallScreen({
         </View>
       ) : queueIdx <= 0 ? (
         <>
+          <StatusBar barStyle={'light-content'} backgroundColor={'black'} />
           <View style={{display: 'flex', flex: 1}}>
             <Text style={styles.text}>Session with Joseph Parker</Text>
             <View style={styles.localStreamContainer}>
@@ -625,8 +627,8 @@ export default function CallScreen({
               <TouchableOpacity style={styles.buttons}>
                 <VectorIcon
                   name={'message'}
-                  type={'FontAwesome6'}
-                  size={20}
+                  type={'Entypo'}
+                  size={30}
                   color={COLORS.white}
                 />
               </TouchableOpacity>
@@ -749,10 +751,8 @@ const styles = StyleSheet.create({
   },
   remoteStream: {
     position: 'absolute',
-    height: height * 0.88,
+    height: height,
     width: '100%',
-    borderBottomRightRadius: 30,
-    borderBottomLeftRadius: 30,
     overflow: 'hidden',
     zIndex: -1,
     flexDirection: 'row',
@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
   clickedButtons: {
     // padding: '4%',
     alignItems: 'center',
-    backgroundColor: COLORS.gray,
+    // backgroundColor: COLORS.gray,
     borderRadius: 50,
   },
   buttons: {
@@ -777,8 +777,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
-    position: 'absolute',
-    bottom: 110,
+    marginBottom: '10%',
   },
   callButtons: {
     padding: 10,

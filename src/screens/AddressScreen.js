@@ -109,7 +109,7 @@ const AddressScreen = ({navigation, route}) => {
           clickedSellerData: clickedSellerData,
         })
       }>
-      <Text style={styles.continueButtonText}>Continue</Text>
+      <Text style={styles.continueButtonText}>continue</Text>
     </TouchableOpacity>
   );
 
@@ -263,7 +263,7 @@ const AddressScreen = ({navigation, route}) => {
                     <TouchableOpacity
                       style={styles.buttonContainer}
                       onPress={handleSubmit}>
-                      <Text style={styles.buttonText}>Save Address</Text>
+                      <Text style={styles.buttonText}>save address</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.blue,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: 30,
   },
   buttonText: {
     color: COLORS.white,
@@ -418,9 +418,9 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     backgroundColor: COLORS.blue,
-    paddingVertical: 10,
+    paddingVertical: 15,
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: 30,
   },
   continueButtonText: {
     color: COLORS.white,
