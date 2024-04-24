@@ -8,9 +8,14 @@ import {
 import RoomScreen from './RoomScreen';
 import CallScreen from './CallScreen';
 import JoinScreen from './JoinScreen';
+import {COLORS} from '../../assets/theme';
+import {Dimensions} from 'react-native';
+const {width, height} = Dimensions.get('window');
 
 export default function WebRTCIndex({route, navigation}) {
+  const {clickedSellerData} = route.params;
   const {clickedSellerDeviceToken} = route.params;
+  const {sellerId} = route.params;
   const screens = {
     ROOM: 'JOIN_ROOM',
     CALL: 'CALL',
@@ -37,10 +42,12 @@ export default function WebRTCIndex({route, navigation}) {
     case screens.CALL:
       content = (
         <CallScreen
-          roomId={clickedSellerDeviceToken}
+          clickedSellerDeviceToken={clickedSellerDeviceToken}
           screens={screens}
           setScreen={setScreen}
           navigation={navigation}
+          sellerId={sellerId}
+          clickedSellerData={clickedSellerData}
         />
       );
       break;
@@ -66,6 +73,8 @@ export default function WebRTCIndex({route, navigation}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    height: height,
+    width: width,
+    backgroundColor: COLORS.white,
   },
 });

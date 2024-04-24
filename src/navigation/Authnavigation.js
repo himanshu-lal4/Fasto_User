@@ -20,10 +20,16 @@ import WebRTC from '../components/WebRTC/WebRTC';
 import RTCIndex from '../components/WebRTC/RTCIndex';
 import LoadingScreen from '../components/Common/LodingScreen';
 import WebRTCIndex from '../components/WebRTCqueue/WebRTCIndex';
+import {addUserData} from '../redux/userDataSlice';
+import firestore from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
+import WaitingQueue from '../screens/WaitingQueue';
+import MessagingScreen from '../screens/MessagingScreen';
+import ListScreen from '../screens/ListScreen';
+import AddressScreen from '../screens/AddressScreen';
+import ChatScreen from '../screens/ChatScreen';
 
 const Stack = createStackNavigator();
-
-// ... (previous imports)
 
 const Authnavigation = () => {
   const dispatch = useDispatch();
@@ -31,13 +37,40 @@ const Authnavigation = () => {
   const [authStateChecked, setAuthStateChecked] = useState(false);
 
   useEffect(() => {
-    const unregister = auth().onAuthStateChanged(userExist => {
+    const unregister = auth().onAuthStateChanged(async userExist => {
+      const token = await messaging().getToken();
       if (userExist) {
+        try {
+          console.log(userExist.uid);
+          const doc = await firestore()
+            .collection('Users')
+            .doc(userExist.uid)
+            .get();
+
+          if (doc.exists) {
+            const userData = doc.data();
+            dispatch(
+              addUserData({
+                userUid: userExist.uid,
+                name: userData.name,
+                email: userData.email,
+                photoUrl: userData.photoUrl,
+                deviceToken: userData.deviceToken,
+                OS: Platform.OS,
+              }),
+            );
+
+            console.log('New seller added to added to redux!');
+          } else {
+            console.log('No such document!');
+          }
+        } catch (error) {
+          console.error('Error updating Firestore document:', error);
+        }
         console.log('userExist.uid firebaseonAuth----->', userExist.uid);
         dispatch(addUID(userExist.uid));
       }
 
-      // Set the authentication state as checked regardless of the user's existence
       setAuthStateChecked(true);
     });
 
@@ -46,28 +79,31 @@ const Authnavigation = () => {
     };
   }, [dispatch]);
 
-  // Render nothing until the authentication state is checked
   if (!authStateChecked) {
-    return <LoadingScreen />; // Replace LoadingScreen with your loading component
+    return <LoadingScreen />;
   }
 
   return (
     <>
-      <StatusBar barStyle={'light-content'} backgroundColor={COLORS.darkBlue} />
+      <StatusBar barStyle={'dark-content'} backgroundColor={COLORS.white} />
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
         }}
-        // initialRouteName="WebRTCIndex"
-      >
+        initialRouteName="AddressScreen">
         {user ? (
           <>
             <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
             <Stack.Screen name="SellerScreen" component={SellerScreen} />
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen name="QR_codeScreen" component={Qr_codeScreen} />
+            <Stack.Screen name="WaitingQueue" component={WaitingQueue} />
             <Stack.Screen name="WebRTCIndex" component={WebRTCIndex} />
             <Stack.Screen name="RTCIndex" component={RTCIndex} />
+            <Stack.Screen name="MessagingScreen" component={MessagingScreen} />
+            <Stack.Screen name="ListScreen" component={ListScreen} />
+            <Stack.Screen name="addressScreen" component={AddressScreen} />
+            <Stack.Screen name="ChatScreen" component={ChatScreen} />
           </>
         ) : (
           <>
